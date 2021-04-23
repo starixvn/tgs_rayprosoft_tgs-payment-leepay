@@ -56,9 +56,11 @@ namespace Tgs.Payment.LeePay
 				orderResult.ChannelRate,
 				orderResult.Channel);
 
+			var applyInfo = new LeePayApplyInfo(settings, response);
+
 			var msg = new DepositResponse
 			{
-				Result = _leePaySerializer.Serialize(response)
+				Result = _leePaySerializer.Serialize(applyInfo)
 			};
 
 			return msg.ToByteArray();
