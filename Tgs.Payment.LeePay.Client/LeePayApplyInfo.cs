@@ -1,5 +1,4 @@
 ﻿using System;
-using Tgs.Payment.LeePay.Client;
 
 namespace Tgs.Payment.LeePay
 {
