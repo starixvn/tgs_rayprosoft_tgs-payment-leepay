@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Tgs.Payment.LeePay.Client;
+using Tgs.Payment.LeePay;
 
 namespace LeePayTest
 {
@@ -20,14 +20,13 @@ namespace LeePayTest
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			var applyInfo = new LeePayApplyInfo
-			{
-				CustomOrderNo = Guid.NewGuid(),
-				ChannelCurrency = "CNY",
-				ReturnUrl = "http://localhost",
-				SystemId = "WG",
-				SystemKey = "7ujm5tgB"
-			};
+			var applyInfo = new LeePayApplyInfo(
+				"WG",
+				"7ujm5tgB",
+				Guid.NewGuid(),
+				"CNY",
+				"http://localhost",
+				null);
 
 			var paymentReturn = await _payClient.DepositAsync(100M, applyInfo).ConfigureAwait(false);
 		}

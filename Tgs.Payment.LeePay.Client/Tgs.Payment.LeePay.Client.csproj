@@ -3,13 +3,15 @@
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<Version>0.0.1-alpha</Version>
+		<Version>0.0.2-alpha</Version>
 		<Authors>Raypro</Authors>
 		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-payment-leepay.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>tgs payment</PackageTags>
 		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-payment-leepay</PackageProjectUrl>
 		<IsPackable>true</IsPackable>
+		<PackageId>Tgs.Payment.LeePay.Client</PackageId>
+		<RootNamespace>Tgs.Payment.LeePay</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>

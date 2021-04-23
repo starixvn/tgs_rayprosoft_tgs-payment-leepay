@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 using Tgs.MessageQueue;
+using Tgs.Payment.LeePay;
 
-namespace Tgs.Payment.LeePay.Client
+namespace Tgs.Payment.LeePay
 {
 	public class LeePayClient
 	{
@@ -38,20 +39,18 @@ namespace Tgs.Payment.LeePay.Client
 
 			_logger.LogInformation(JsonFormatter.ToDiagnosticString(response));
 
-			return new LeePayPaymentReturn
-			{
-				Code = response.Code,
-				Message = string.IsNullOrEmpty(response.Message) ? null : response.Message,
-				OrderId = response.OrderId,
-				OrderNo = response.OrderNo,
-				CustomOrderNo = Guid.Parse(response.CustomOrderNo),
-				WalletAddress = response.WalletAddress,
-				PaymentUrl = response.PaymentUrl,
-				UsdtAmount = decimal.Parse(response.UsdtAmount),
-				ChannelCurrency = response.ChannelCurrency,
-				ChannelRate = decimal.Parse(response.ChannelRate),
-				Channel = string.IsNullOrEmpty(response.Channel) ? null : response.Channel
-			};
+			return new LeePayPaymentReturn(
+				response.Code,
+				string.IsNullOrEmpty(response.Message) ? null : response.Message,
+				response.OrderId,
+				response.OrderNo,
+				Guid.Parse(response.CustomOrderNo),
+				response.WalletAddress,
+				response.PaymentUrl,
+				decimal.Parse(response.UsdtAmount),
+				response.ChannelCurrency,
+				decimal.Parse(response.ChannelRate),
+				string.IsNullOrEmpty(response.Channel) ? null : response.Channel);
 		}
 	}
 }

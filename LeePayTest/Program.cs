@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Tgs.Payment.LeePay.Client;
+using Tgs.Payment.LeePay;
 
 namespace LeePayTest
 {
