@@ -30,17 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Protos\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Tgs.Payment.LeePay.Client\Tgs.Payment.LeePay.Client.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="..\Protos\leepay.proto" GrpcServices="None" Access="Internal">
-      <Link>Protos\leepay.proto</Link>
-    </Protobuf>
   </ItemGroup>
 
 </Project>
