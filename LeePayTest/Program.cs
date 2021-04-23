@@ -11,7 +11,10 @@ namespace LeePayTest
 				.ConfigureServices(services =>
 				{
 					services.AddNatsMessageQueue(config => { });
-					services.AddTransient<LeePayClient>();
+					services.AddPaymentClient();
+					services
+						.AddSystemJsonSerializer()
+						.AddSingleton<LeePaySerializer>();
 					services.AddHostedService<Demo>();
 				});
 

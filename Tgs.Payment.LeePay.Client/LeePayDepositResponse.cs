@@ -2,7 +2,7 @@
 
 namespace Tgs.Payment.LeePay
 {
-	public record LeePayPaymentReturn(
+	public record LeePayDepositResponse(
 		string Code,
 		string? Message,
 		string OrderId,

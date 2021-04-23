@@ -18,6 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Tgs.MessageQueue.Nats" Version="0.0.1" />
+    <PackageReference Include="Tgs.Payment" Version="0.0.1-alpha" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,9 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\Protos\leepay.proto" Access="Internal" GrpcServices="None">
-      <Link>Protos\leepay.proto</Link>
-    </Protobuf>
+    <ProjectReference Include="..\Tgs.Payment.LeePay.Client\Tgs.Payment.LeePay.Client.csproj" />
   </ItemGroup>
 
 </Project>

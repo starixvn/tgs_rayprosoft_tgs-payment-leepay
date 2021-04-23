@@ -17,12 +17,15 @@ namespace Tgs.Payment.LeePay
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddLeePay((options, sp) =>
-			{
-				var config = sp.GetRequiredService<IConfiguration>();
+			services
+				.AddLeePay((options, sp) =>
+				{
+					var config = sp.GetRequiredService<IConfiguration>();
 
-				config.GetSection("LeePay").Bind(options);
-			});
+					config.GetSection("LeePay").Bind(options);
+				})
+				.AddSystemJsonSerializer()
+				.AddSingleton<LeePaySerializer>(); ;
 
 			services
 				.AddControllers()
