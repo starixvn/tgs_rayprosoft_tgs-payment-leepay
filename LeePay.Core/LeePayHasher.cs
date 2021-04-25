@@ -8,7 +8,7 @@ namespace Tgs.Payment.LeePay
 {
 	public class LeePayHasher
 	{
-		public string ComputeHash(string systemId, string systemKey, Dictionary<string, object> dict)
+		public string ComputeHash(string systemId, string systemKey, IDictionary<string, object> dict)
 		{
 			var content = string.Join("&", dict.OrderBy(p => p.Key).Select(p => $"{p.Key}={p.Value}"));
 

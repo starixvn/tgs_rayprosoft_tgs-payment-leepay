@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.LeePay;
 
@@ -20,6 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
 					httpClient.BaseAddress = options.PaymentApiUrl;
 				})
 				.Services
+				.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient)
 				.AddSingleton<LeePayHasher>()
 				.AddNatsMessageQueue(config =>
 				{
