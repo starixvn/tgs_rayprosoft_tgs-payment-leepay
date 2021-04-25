@@ -20,6 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
 					httpClient.BaseAddress = options.PaymentApiUrl;
 				})
 				.Services
+				.AddSingleton<LeePayHasher>()
 				.AddNatsMessageQueue(config =>
 				{
 					config

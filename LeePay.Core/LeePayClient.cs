@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Mime;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -16,12 +13,18 @@ namespace Tgs.Payment.LeePay
 	{
 		private readonly HttpClient _httpClient;
 		private readonly JsonSerializerOptions? _jsonSerializerOptions;
+		private readonly LeePayHasher _hasher;
 		private readonly ILogger<LeePayClient> _logger;
 
-		public LeePayClient(HttpClient httpClient, JsonSerializerOptions? jsonSerializerOptions, ILogger<LeePayClient> logger)
+		public LeePayClient(
+			HttpClient httpClient,
+			JsonSerializerOptions? jsonSerializerOptions,
+			LeePayHasher hasher,
+			ILogger<LeePayClient> logger)
 		{
 			_httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 			_jsonSerializerOptions = jsonSerializerOptions;
+			_hasher = hasher ?? throw new ArgumentNullException(nameof(hasher));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
@@ -57,17 +60,7 @@ namespace Tgs.Payment.LeePay
 		{
 			var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(SerializeObject(order))!;
 
-			var content = string.Join("&", dict.OrderBy(p => p.Key).Select(p => $"{p.Key}={p.Value}"));
-
-			var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
-
-			var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
-
-			var hash = string.Join(
-				string.Empty,
-				SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
-
-			return hash;
+			return _hasher.ComputeHash(systemId, systemKey, dict);
 		}
 	}
 }

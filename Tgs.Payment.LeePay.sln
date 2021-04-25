@@ -7,14 +7,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Payment.LeePay", "Tgs.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeePay.Core", "LeePay.Core\LeePay.Core.csproj", "{40162430-E0C0-4E46-8BE7-E6333A0712D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeePayTest", "LeePayTest\LeePayTest.csproj", "{22B20713-006D-48F6-9861-DC777C9B016B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeePayTest", "LeePayTest\LeePayTest.csproj", "{22B20713-006D-48F6-9861-DC777C9B016B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.Payment.LeePay.Client", "Tgs.Payment.LeePay.Client\Tgs.Payment.LeePay.Client.csproj", "{CF5C103F-7CA0-4E74-828F-12A8DB905139}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.Payment.LeePay.Client", "Tgs.Payment.LeePay.Client\Tgs.Payment.LeePay.Client.csproj", "{CF5C103F-7CA0-4E74-828F-12A8DB905139}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C4964824-79EF-4813-BDE1-8A83256C9D8E}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeePayRepositories", "LeePayRepositories\LeePayRepositories.csproj", "{F1F0E4AB-0279-465C-BA7F-64C062480920}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +40,10 @@ Global
 		{CF5C103F-7CA0-4E74-828F-12A8DB905139}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF5C103F-7CA0-4E74-828F-12A8DB905139}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF5C103F-7CA0-4E74-828F-12A8DB905139}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1F0E4AB-0279-465C-BA7F-64C062480920}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1F0E4AB-0279-465C-BA7F-64C062480920}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1F0E4AB-0279-465C-BA7F-64C062480920}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1F0E4AB-0279-465C-BA7F-64C062480920}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

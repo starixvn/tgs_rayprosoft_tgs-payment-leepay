@@ -19,6 +19,7 @@
     </PackageReference>
     <PackageReference Include="Tgs.MessageQueue.Nats" Version="0.0.1" />
     <PackageReference Include="Tgs.Payment" Version="0.0.1-alpha" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
