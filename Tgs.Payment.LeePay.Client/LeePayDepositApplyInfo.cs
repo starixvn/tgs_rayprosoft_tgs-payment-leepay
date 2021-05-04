@@ -1,6 +1,6 @@
 ﻿namespace Tgs.Payment.LeePay
 {
-	public record LeePayApplyInfo(
+	public record LeePayDepositApplyInfo(
 		LeePayDepositSettings Settings,
 		LeePayDepositResponse Response);
 }
