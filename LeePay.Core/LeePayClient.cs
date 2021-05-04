@@ -53,10 +53,33 @@ namespace Tgs.Payment.LeePay
 			return result!;
 		}
 
-		private string SerializeObject(DepositOrder order)
+		public async ValueTask<LeePayResponse<WithdrawResult>> WidthdrawAsync(string systemId, string systemKey, WithdrawOrder order)
+		{
+			order.TranscationSigningCode = ComputeHash(systemId, systemKey, order);
+
+			var requestContent = new StringContent(SerializeObject(order));
+			requestContent.Headers.Add("SYSTEM_ID", systemId);
+			requestContent.Headers.Add("SYSTEM_KEY", systemKey);
+
+			var response = await _httpClient
+				.PostAsync("/payment/mchw/v3/payfor", requestContent)
+				.ConfigureAwait(false);
+
+			_logger.LogInformation($"Deposit StatusCode: {response.StatusCode}");
+
+			var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+			_logger.LogInformation($"Deposit Body: {bodyJson}");
+
+			var result = JsonSerializer.Deserialize<LeePayResponse<WithdrawResult>>(bodyJson, _jsonSerializerOptions);
+
+			return result!;
+		}
+
+		private string SerializeObject<TOrder>(TOrder order)
 			=> JsonSerializer.Serialize(order, _jsonSerializerOptions);
 
-		private string ComputeHash(string systemId, string systemKey, DepositOrder order)
+		private string ComputeHash<TOrder>(string systemId, string systemKey, TOrder order)
 		{
 			var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(SerializeObject(order))!;
 
