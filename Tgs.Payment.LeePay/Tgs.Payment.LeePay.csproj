@@ -1,20 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UserSecretsId>45e7600c-5c3c-473e-812c-abd7969a386a</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
+		<GlobalNugetConfig Condition="'$(UserProfile)'==''">~/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
+		<DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
+		<DockerfileTag Condition="$(DockerfileTag) == ''">payment/leepay</DockerfileTag>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
+		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LeePay.Core\LeePay.Core.csproj" />
-    <ProjectReference Include="..\LeePayRepositories\LeePayRepositories.csproj" />
-  </ItemGroup>
-
+	<ItemGroup>
+		<ProjectReference Include="..\LeePay.Core\LeePay.Core.csproj" />
+		<ProjectReference Include="..\LeePayRepositories\LeePayRepositories.csproj" />
+	</ItemGroup>
 </Project>
