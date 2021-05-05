@@ -50,6 +50,8 @@ namespace Tgs.Payment.LeePay
 
 			var result = JsonSerializer.Deserialize<LeePayResponse<DepositResult>>(bodyJson, _jsonSerializerOptions);
 
+			result!.OriginalResponse = bodyJson;
+
 			return result!;
 		}
 
@@ -57,21 +59,27 @@ namespace Tgs.Payment.LeePay
 		{
 			order.TranscationSigningCode = ComputeHash(systemId, systemKey, order);
 
+			var json = SerializeObject(order);
+			_logger.LogInformation(json);
 			var requestContent = new StringContent(SerializeObject(order));
 			requestContent.Headers.Add("SYSTEM_ID", systemId);
 			requestContent.Headers.Add("SYSTEM_KEY", systemKey);
+
+			requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
 
 			var response = await _httpClient
 				.PostAsync("/payment/mchw/v3/payfor", requestContent)
 				.ConfigureAwait(false);
 
-			_logger.LogInformation($"Deposit StatusCode: {response.StatusCode}");
+			_logger.LogInformation($"Withdraw StatusCode: {response.StatusCode}");
 
 			var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-			_logger.LogInformation($"Deposit Body: {bodyJson}");
+			_logger.LogInformation($"Withdraw Body: {bodyJson}");
 
 			var result = JsonSerializer.Deserialize<LeePayResponse<WithdrawResult>>(bodyJson, _jsonSerializerOptions);
+
+			result!.OriginalResponse = bodyJson;
 
 			return result!;
 		}

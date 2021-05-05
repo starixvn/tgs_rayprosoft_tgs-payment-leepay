@@ -23,16 +23,28 @@ namespace LeePayTest
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			var settings = new LeePayDepositSettings(
+			//var settings = new LeePayDepositSettings(
+			//	"WG",
+			//	"7ujm5tgB",
+			//	Guid.NewGuid(),
+			//	"CNY",
+			//	"http://localhost",
+			//	null);
+
+			//var paymentReturn = await _paymentClient
+			//	.DepositAsync("tgs.payment.leepay.deposit", 100M, _leePaySerializer.Serialize(settings))
+			//	.ConfigureAwait(false);
+
+			var withdrawSettings = new LeePayWithdrawSettings(
 				"WG",
 				"7ujm5tgB",
 				Guid.NewGuid(),
+				"0x602E77268019813B5507402bC9A196Df1388479D",
 				"CNY",
-				"http://localhost",
 				null);
 
-			var paymentReturn = await _paymentClient
-				.DepositAsync("tgs.payment.leepay", 100M, _leePaySerializer.Serialize(settings))
+			var withdrawReturn = await _paymentClient
+				.WithdrawAsync("tgs.payment.leepay.withdraw", 1000M, _leePaySerializer.Serialize(withdrawSettings))
 				.ConfigureAwait(false);
 		}
 	}

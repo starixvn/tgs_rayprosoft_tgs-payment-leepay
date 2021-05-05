@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LeePay.Core\LeePay.Core.csproj" />
+    <ProjectReference Include="..\LeePayRepositories\LeePayRepositories.csproj" />
   </ItemGroup>
 
 </Project>
