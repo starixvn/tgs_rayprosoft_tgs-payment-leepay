@@ -24,7 +24,24 @@ namespace Tgs.Payment.LeePay.Repositories
 				data.BrandId,
 				data.BrandPaymentId,
 				data.Amount,
+				data.Status,
 				_serializer.Deserialize<LeePayDepositApplyInfo>(data.ApplyInfo),
+				data.PaymentReturn);
+		}
+
+		public async ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid id)
+		{
+			var data = await _dbContext.WithdrawForms.FindAsync(id).ConfigureAwait(false);
+
+			return new WithdrawFormInfo(
+				data.PlayerCode,
+				data.BrandId,
+				data.BrandPaymentId,
+				data.Amount,
+				data.Status,
+				data.BankInfoId,
+				data.BankInfo,
+				_serializer.Deserialize<LeePayWithdrawApplyInfo>(data.ApplyInfo),
 				data.PaymentReturn);
 		}
 	}

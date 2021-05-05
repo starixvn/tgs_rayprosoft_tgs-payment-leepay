@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Tgs.Payment.LeePay.ViewModels
 {
-	public record DepositReponseViewModel
+	public record DepositResponseViewModel
 	{
 		public string CustomOrderNo { get; init; }
 

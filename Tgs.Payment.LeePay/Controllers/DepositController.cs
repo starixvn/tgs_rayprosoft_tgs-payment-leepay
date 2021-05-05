@@ -23,13 +23,11 @@ namespace Tgs.Payment.LeePay.Controllers
 		}
 
 		[HttpPost("callback")]
-		public async Task<DepositConfirmResponseViewModel> DepositCallbackAsync(
+		public async Task<DepositConfirmViewModel> DepositCallbackAsync(
 			[FromServices] IOptions<JsonOptions> jsonOptions,
 			[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
 			[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
-			[FromServices] ITgsRepository tgsRepository,
-			[FromServices] LeePaySerializer serializer,
-			[FromBody] DepositReponseViewModel response)
+			[FromBody] DepositResponseViewModel response)
 		{
 			var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
 			_logger.LogInformation(JsonSerializer.Serialize(response, jsonSerializerOptions));
@@ -52,7 +50,7 @@ namespace Tgs.Payment.LeePay.Controllers
 				.ConfigureAwait(false);
 
 			if (await checkSigningCodeCommand.CommandResultSource.Task.ConfigureAwait(false))
-				return new DepositConfirmResponseViewModel
+				return new DepositConfirmViewModel
 				{
 					Code = "00",
 					Message = "Success"

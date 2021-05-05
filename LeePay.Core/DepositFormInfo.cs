@@ -7,6 +7,7 @@ namespace Tgs.Payment.LeePay
 		Guid BrandId,
 		Guid BrandPaymentId,
 		decimal Amount,
+		int Status,
 		LeePayDepositApplyInfo? ApplyInfo,
 		string? PaymentReturn = null);
 }
