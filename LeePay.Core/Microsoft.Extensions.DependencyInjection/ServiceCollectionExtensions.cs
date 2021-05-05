@@ -32,7 +32,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
 							options.Url = leePayOptions.NatsUrl;
 						})
-						.AddProcessor<DepositProcessor>("tgs.payment.leepay", "tgs.payment.leepay");
+						.AddProcessor<DepositProcessor>("tgs.payment.leepay.deposit", "tgs.payment.leepay.deposit")
+						.AddProcessor<WithdrawProcessor>("tgs.payment.leepay.withdraw", "tgs.payment.leepay.withdraw");
 				});
 		}
 	}

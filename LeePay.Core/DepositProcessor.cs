@@ -56,7 +56,7 @@ namespace Tgs.Payment.LeePay
 				orderResult.ChannelRate,
 				orderResult.Channel);
 
-			var applyInfo = new LeePayApplyInfo(settings, response);
+			var applyInfo = new LeePayDepositApplyInfo(settings, response);
 
 			var msg = new DepositResponse
 			{

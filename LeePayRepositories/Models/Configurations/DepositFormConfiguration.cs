@@ -55,9 +55,9 @@ namespace LeePayRepositories.Entities.Configurations
 
             entity.Property(e => e.Status).HasColumnName("status");
 
-            entity.Property(e => e.UpdateOn)
+            entity.Property(e => e.UpdatedOn)
                 .HasColumnType("timestamp with time zone")
-                .HasColumnName("update_on")
+                .HasColumnName("updated_on")
                 .HasDefaultValueSql("now()");
 
             OnConfigurePartial(entity);
