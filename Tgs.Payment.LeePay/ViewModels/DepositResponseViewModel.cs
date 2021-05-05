@@ -1,22 +1,20 @@
-﻿#pragma warning disable CS8618 // 退出建構函式時，不可為 Null 的欄位必須包含非 Null 值。請考慮宣告為可為 Null。
-
-using System;
+﻿using System;
 using System.Text.Json.Serialization;
 
 namespace Tgs.Payment.LeePay.ViewModels
 {
 	public record DepositResponseViewModel
 	{
-		public string CustomOrderNo { get; init; }
+		public string CustomOrderNo { get; init; } = default!;
 
 		[JsonPropertyName("notifyCustomMsg")]
-		public string NotifyCustomMessage { get; init; }
+		public string NotifyCustomMessage { get; init; } = default!;
 
-		public string OrderNo { get; init; }
+		public string OrderNo { get; init; } = default!;
 
-		public string Uid { get; init; }
+		public string Uid { get; init; } = default!;
 
-		public string Status { get; init; }
+		public string Status { get; init; } = default!;
 
 		public decimal OrderAmount { get; init; }
 
@@ -24,19 +22,17 @@ namespace Tgs.Payment.LeePay.ViewModels
 
 		public decimal Fee { get; init; }
 
-		public string ToAddress { get; init; }
+		public string ToAddress { get; init; } = default!;
 
-		public string TransactionHash { get; init; }
+		public string TransactionHash { get; init; } = default!;
 
 		public DateTimeOffset CreatedAt { get; init; }
 
-		public string Channel { get; init; }
+		public string Channel { get; init; } = default!;
 
-		public string ActualAmount { get; init; }
+		public string ActualAmount { get; init; } = default!;
 
 		[JsonPropertyName("txnSign")]
-		public string TranscationSigningCode { get; init; }
+		public string TranscationSigningCode { get; init; } = default!;
 	}
 }
-
-#pragma warning restore CS8618 // 退出建構函式時，不可為 Null 的欄位必須包含非 Null 值。請考慮宣告為可為 Null。

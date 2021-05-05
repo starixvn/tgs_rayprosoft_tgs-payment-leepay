@@ -1,6 +1,4 @@
-﻿#pragma warning disable CS8618 // 退出建構函式時，不可為 Null 的欄位必須包含非 Null 值。請考慮宣告為可為 Null。
-
-using System;
+﻿using System;
 using System.Text.Json.Serialization;
 
 namespace Tgs.Payment.LeePay.ViewModels
@@ -9,7 +7,7 @@ namespace Tgs.Payment.LeePay.ViewModels
 	{
 		public DateTimeOffset CreatedAt { get; init; }
 
-		public string CustomOrderNo { get; init; }
+		public string CustomOrderNo { get; init; } = default!;
 
 		public decimal Fee { get; init; }
 
@@ -17,17 +15,15 @@ namespace Tgs.Payment.LeePay.ViewModels
 
 		public decimal OrderAmount { get; init; }
 
-		public string OrderNo { get; init; }
+		public string OrderNo { get; init; } = default!;
 
-		public string Status { get; init; }
+		public string Status { get; init; } = default!;
 
-		public string ToAddress { get; init; }
+		public string ToAddress { get; init; } = default!;
 
-		public string TranscationHash { get; init; }
+		public string TranscationHash { get; init; } = default!;
 
 		[JsonPropertyName("txnSign")]
-		public string TranscationSigningCode { get; init; }
+		public string TranscationSigningCode { get; init; } = default!;
 	}
 }
-
-#pragma warning restore CS8618 // 退出建構函式時，不可為 Null 的欄位必須包含非 Null 值。請考慮宣告為可為 Null。
