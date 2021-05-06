@@ -23,4 +23,6 @@
 		<ProjectReference Include="..\LeePay.Core\LeePay.Core.csproj" />
 		<ProjectReference Include="..\LeePayRepositories\LeePayRepositories.csproj" />
 	</ItemGroup>
+
+	<ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 </Project>

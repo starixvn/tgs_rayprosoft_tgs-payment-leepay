@@ -40,16 +40,33 @@ pipeline {
 			}
 
 			steps {
-				script {
-					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
-						sh '''
-							helm template k8s/leepay \
-								--set image.tag=v${BUILD_NUMBER}
-						'''
-						sh '''
-							helm template k8s/leepay \
-								--set image.tag=v${BUILD_NUMBER} | kubectl -n dev apply -f -
-						'''
+				configFileProvider([
+					configFile(
+						fileId: 'leepay.dev.json', 
+						variable: 'leepaydev')]) {
+					script {
+						def json = readJSON file: "$leepaydev";
+
+						env.TGS = json.tgs;
+                        env.PaymentApiUrl = json.paymentApiUrl;
+                        env.NatsUri = json.nats;
+
+						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
+							sh '''
+								helm template k8s/leepay \
+									--set image.tag=v${BUILD_NUMBER} \
+									--set namespace=dev \
+									--set "connectionStrings.tgs=${TGS}" \
+									--set nats=${NatsUri}
+							'''
+							sh '''
+								helm template k8s/leepay \
+									--set image.tag=v${BUILD_NUMBER} \
+									--set namespace=dev \
+									--set "connectionStrings.tgs=${TGS}" \
+									--set nats=${NatsUri} | kubectl -n dev apply -f -
+							'''
+						}
 					}
 				}
 			}

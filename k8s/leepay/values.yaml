@@ -10,6 +10,15 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
+namaespace: dev
+
+connectionStrings:
+  tgs: Server=localhost;Database=tgs;User Id=tgs;Password=1qaz2wsx!@
+
+nats: nats://localhost:4222
+
+paymentApiUrl: https://api.leepay-wallet.com
+
 # 狀態為可以最小秒數
 minReadySeconds: 8 
 
