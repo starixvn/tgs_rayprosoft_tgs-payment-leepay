@@ -23,13 +23,35 @@ pipeline {
 
 		stage('Build Docker Image') {
 			steps {
-				sh 'dotnet build "Tgs.Payment.LeePay/Tgs.Payment.LeePay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:v${currentBuild.number}" --no-restore '
+				sh 'dotnet build "Tgs.Payment.LeePay/Tgs.Payment.LeePay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:v${BUILD_NUMBER}" --no-restore '
 			}
 		}
 
 		stage('Push Docker Image') {
 			steps {
-				sh 'sudo docker push $ImageName:v${currentBuild.number}'
+				sh 'sudo docker push $ImageName:v${BUILD_NUMBER}'
+			}
+		}
+
+		stage('Deploy to dev') {
+			input {
+				message 'Ready to go?'
+				ok 'yes'
+			}
+
+			steps {
+				script {
+					withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
+						sh '''
+							helm template k8s/leepay \
+								--set image.tag=v${BUILD_NUMBER}
+						'''
+						sh '''
+							helm template k8s/leepay \
+								--set image.tag=v${BUILD_NUMBER} | kubectl -n dev apply -f -
+						'''
+					}
+				}
 			}
 		}
 	}
