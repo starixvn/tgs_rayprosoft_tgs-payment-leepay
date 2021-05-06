@@ -22,7 +22,9 @@ strategy:
     # 佈署期間允許最大建立pod數量(replicas)
     maxSurge: 2 
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: registry-credentials
+
 nameOverride: "payment-leepay"
 fullnameOverride: "payment-leepay"
 
