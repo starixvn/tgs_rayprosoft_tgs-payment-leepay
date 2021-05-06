@@ -23,7 +23,7 @@ pipeline {
 
 		stage('Build Docker Image') {
 			steps {
-				sh 'dotnet build -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:v${currentBuild.number}" --no-restore "Tgs.Payment.LeePay/Tgs.Payment.LeePay.csproj"'
+				sh 'dotnet build "Tgs.Payment.LeePay/Tgs.Payment.LeePay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:v${currentBuild.number}" --no-restore '
 			}
 		}
 
