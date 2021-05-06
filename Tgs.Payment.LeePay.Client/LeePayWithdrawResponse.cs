@@ -4,11 +4,12 @@ namespace Tgs.Payment.LeePay
 {
 	public record LeePayWithdrawResponse(
 		string Code,
-		string? Message,
-		string OrderNo,
-		Guid CustomOrderNo,
-		decimal UsdtAmount,
-		string ChannelCurrency,
-		decimal ChannelRate,
-		string? Channel);
+		string? Message = null,
+		string? OrderNo = null,
+		Guid? CustomOrderNo = null,
+		decimal? UsdtAmount = null,
+		string? ChannelCurrency = null,
+		decimal? ChannelRate = null,
+		string? Channel = null,
+		string? ResponseContent = null);
 }

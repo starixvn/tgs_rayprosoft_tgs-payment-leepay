@@ -4,6 +4,7 @@ pipeline {
 	environment {
 		gitlab_user_pwd=credentials('gitlab-user-pwd')
         BuildConfiguration="Debug"
+		ImageName="registry.gitlab.com/rayprosoft/turnkey-gaming-system/leepay"
 	}
 
     stages {
@@ -17,6 +18,18 @@ pipeline {
 			steps {
 				sh 'dotnet pack -c $BuildConfiguration "Tgs.Payment.LeePay.Client/Tgs.Payment.LeePay.Client.csproj" --no-build'
 				sh 'dotnet nuget push "Tgs.Payment.LeePay.Client/bin/$BuildConfiguration/*.nupkg" --source "raypro" --skip-duplicate'
+			}
+		}
+
+		stage('Build Docker Image') {
+			steps {
+				sh 'dotnet build -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:v${currentBuild.number}" --no-restore "Tgs.Payment.LeePay/Tgs.Payment.LeePay.csproj"'
+			}
+		}
+
+		stage('Push Docker Image') {
+			steps {
+				sh 'sudo docker push $ImageName:v${currentBuild.number}'
 			}
 		}
 	}

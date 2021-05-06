@@ -1,0 +1,62 @@
+# Default values for leepay.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.gitlab.com/rayprosoft/turnkey-gaming-system/leepay
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+# 狀態為可以最小秒數
+minReadySeconds: 8 
+
+strategy:
+  # 使用RollingUpdate類型, 可以保證佈署期間服務不中斷
+  type: RollingUpdate 
+  rollingUpdate:
+    # 佈署期間允許最大停止pod數量(replicas)
+    maxUnavailable: 1 
+    # 佈署期間允許最大建立pod數量(replicas)
+    maxSurge: 2 
+
+imagePullSecrets: []
+nameOverride: "payment-leepay"
+fullnameOverride: "payment-leepay"
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

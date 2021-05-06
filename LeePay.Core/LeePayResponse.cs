@@ -7,5 +7,7 @@
 		public string Message { get; init; } = default!;
 
 		public TData? Data { get; init; }
+
+		public string? OriginalResponse { get; set; }
 	}
 }
