@@ -9,6 +9,6 @@ namespace Tgs.Payment.LeePay.Services
 		string SystemId,
 		string SystemKey)
 	{
-		public TaskCompletionSource<bool> CommandResultSource => new TaskCompletionSource<bool>();
+		public TaskCompletionSource<bool> CommandResultSource { get; } = new TaskCompletionSource<bool>();
 	};
 }

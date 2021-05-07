@@ -27,24 +27,24 @@ namespace LeePayTest
 			//	"WG",
 			//	"7ujm5tgB",
 			//	Guid.NewGuid(),
-			//	"CNY",
+			//	"USDT",
 			//	"http://localhost",
-			//	null);
+			//	"TRON");
 
 			//var paymentReturn = await _paymentClient
-			//	.DepositAsync("tgs.payment.leepay.deposit", 100M, _leePaySerializer.Serialize(settings))
+			//	.DepositAsync("tgs.payment.leepay.deposit", 2M, _leePaySerializer.Serialize(settings))
 			//	.ConfigureAwait(false);
 
 			var withdrawSettings = new LeePayWithdrawSettings(
 				"WG",
 				"7ujm5tgB",
 				Guid.NewGuid(),
-				"0x602E77268019813B5507402bC9A196Df1388479D",
-				"CNY",
-				null);
+				"TPRRBg6zL54vm8AHpbLJAeYqem4ntJsUKa",
+				"USDT",
+				"TRON");
 
 			var withdrawReturn = await _paymentClient
-				.WithdrawAsync("tgs.payment.leepay.withdraw", 1000M, _leePaySerializer.Serialize(withdrawSettings))
+				.WithdrawAsync("tgs.payment.leepay.withdraw", 10M, _leePaySerializer.Serialize(withdrawSettings))
 				.ConfigureAwait(false);
 		}
 	}

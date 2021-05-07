@@ -59,8 +59,6 @@ namespace Tgs.Payment.LeePay
 		{
 			order.TranscationSigningCode = ComputeHash(systemId, systemKey, order);
 
-			var json = SerializeObject(order);
-			_logger.LogInformation(json);
 			var requestContent = new StringContent(SerializeObject(order));
 			requestContent.Headers.Add("SYSTEM_ID", systemId);
 			requestContent.Headers.Add("SYSTEM_KEY", systemKey);

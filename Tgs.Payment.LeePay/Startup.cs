@@ -26,6 +26,7 @@ namespace Tgs.Payment.LeePay
 
 			app.UseEndpoints(endpoints =>
 			{
+				endpoints.MapControllers();
 				endpoints.MapGet("/", async context =>
 				{
 					await context.Response.WriteAsync("Hello World!");
@@ -62,6 +63,7 @@ namespace Tgs.Payment.LeePay
 				{
 					options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
 					options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+					options.JsonSerializerOptions.Converters.Add(new LeePayDateTimeOffsetConverter());
 				});
 
 			services.AddTransient(sp =>

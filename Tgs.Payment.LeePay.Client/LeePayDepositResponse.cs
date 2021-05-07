@@ -4,14 +4,15 @@ namespace Tgs.Payment.LeePay
 {
 	public record LeePayDepositResponse(
 		string Code,
-		string? Message,
-		string OrderId,
-		string OrderNo,
-		Guid CustomOrderNo,
-		string WalletAddress,
-		string PaymentUrl,
-		decimal UsdtAmount,
-		string ChannelCurrency,
-		decimal ChannelRate,
-		string? Channel);
+		string? Message = null,
+		string? OrderId = null,
+		string? OrderNo = null,
+		Guid? CustomOrderNo = null,
+		string? WalletAddress = null,
+		string? PaymentUrl = null,
+		decimal? UsdtAmount = null,
+		string? ChannelCurrency = null,
+		decimal? ChannelRate = null,
+		string? Channel = null,
+		string? ResponseContent = null);
 }

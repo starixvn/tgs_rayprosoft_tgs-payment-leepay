@@ -32,7 +32,7 @@ namespace Tgs.Payment.LeePay
 				Amount = decimal.Parse(request.Amount),
 				NotifyUrl = "https://payment.yggdrasill.dev/api/deposit/callback",
 				ReturnUrl = settings.ReturnUrl,
-				DepositLimitTime = 1,
+				DepositLimitTime = 60,
 				ChannelCurrency = settings.ChannelCurrency,
 				Channel = string.IsNullOrEmpty(settings.Channel) ? null : settings.Channel
 			};
@@ -43,27 +43,48 @@ namespace Tgs.Payment.LeePay
 
 			var orderResult = result.Data!;
 
-			var response = new LeePayDepositResponse(
-				result.Code,
-				result.Message,
-				orderResult.OrderId,
-				orderResult.OrderNo,
-				new Guid(Convert.FromBase64String(orderResult.CustomOrderNo)),
-				orderResult.WalletAddress,
-				orderResult.PaymentUrl,
-				orderResult.UsdtAmount,
-				orderResult.ChannelCurrency,
-				orderResult.ChannelRate,
-				orderResult.Channel);
-
-			var applyInfo = new LeePayDepositApplyInfo(settings, response);
-
-			var msg = new DepositResponse
+			if (result.Code == "00")
 			{
-				Result = _leePaySerializer.Serialize(applyInfo)
-			};
+				var response = new LeePayDepositResponse(
+					result.Code,
+					result.Message,
+					orderResult.OrderId,
+					orderResult.OrderNo,
+					new Guid(Convert.FromBase64String(orderResult.CustomOrderNo)),
+					orderResult.WalletAddress,
+					orderResult.PaymentUrl,
+					orderResult.UsdtAmount,
+					orderResult.ChannelCurrency,
+					orderResult.ChannelRate,
+					orderResult.Channel);
 
-			return msg.ToByteArray();
+				var applyInfo = new LeePayDepositApplyInfo(settings, response);
+
+				var msg = new DepositResponse
+				{
+					Result = _leePaySerializer.Serialize(applyInfo)
+				};
+
+				return msg.ToByteArray();
+			}
+			else
+			{
+				var response = new LeePayDepositResponse(
+					result.Code,
+					result.Message,
+					ResponseContent: result.OriginalResponse);
+
+				var applyInfo = new LeePayDepositApplyInfo(settings, response);
+
+				var msg = new WithdrawResponse
+				{
+					Result = _leePaySerializer.Serialize(applyInfo)
+				};
+
+				return msg.ToByteArray();
+			}
+
+			
 		}
 	}
 }
