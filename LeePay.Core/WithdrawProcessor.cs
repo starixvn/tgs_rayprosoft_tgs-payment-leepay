@@ -12,9 +12,9 @@ namespace Tgs.Payment.LeePay
 	{
 		private readonly LeePaySerializer _leePaySerializer;
 		private readonly ILogger<WithdrawProcessor> _logger;
-		private readonly LeePayClient _payClient;
+		private readonly ILeePayClient _payClient;
 
-		public WithdrawProcessor(LeePayClient payClient, LeePaySerializer leePaySerializer, ILogger<WithdrawProcessor> logger)
+		public WithdrawProcessor(ILeePayClient payClient, LeePaySerializer leePaySerializer, ILogger<WithdrawProcessor> logger)
 		{
 			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
 			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));

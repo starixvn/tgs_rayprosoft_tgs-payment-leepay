@@ -9,7 +9,7 @@ namespace Tgs.Payment.LeePay.ViewModels
 
 		public DateTimeOffset CreatedAt { get; init; }
 
-		public string? CustomOrderNo { get; init; } = default!;
+		public string CustomOrderNo { get; init; } = default!;
 
 		public decimal Fee { get; init; }
 

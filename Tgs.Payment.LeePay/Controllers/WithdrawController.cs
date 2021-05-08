@@ -30,30 +30,26 @@ namespace Tgs.Payment.LeePay.Controllers
 			[FromBody] Dictionary<string, object> response)
 		{
 			var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
-			_logger.LogInformation(JsonSerializer.Serialize(response, jsonSerializerOptions));
-
-			//var depositForm = await getDepositFormService
-			//	.GetAsync(new GetDepositFormQuery(response.CustomOrderNo))
-			//	.ConfigureAwait(false);
 
 			var json = JsonSerializer.Serialize(response, jsonSerializerOptions);
+
+			_logger.LogInformation(json);
 
 			var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(json)!;
 			dict.Remove("txnSign");
 
 			var withdrawResponse = JsonSerializer.Deserialize<WithdrawResponseViewModel>(json)!;
 
-			//var checkSigningCodeCommand = new CheckSigningCodeCommand(
-			//	dict,
-			//	response.TranscationSigningCode,
-			//	depositForm.ApplyInfo!.Settings.SystemId,
-			//	depositForm.ApplyInfo!.Settings.SystemKey);
+			var depositForm = await getDepositFormService
+				.GetAsync(new GetDepositFormQuery(withdrawResponse.CustomOrderNo))
+				.ConfigureAwait(false);
 
 			var checkSigningCodeCommand = new CheckSigningCodeCommand(
 				dict,
 				withdrawResponse.TranscationSigningCode,
-				"WG",
-				"7ujm5tgB");
+				depositForm.ApplyInfo!.Settings.SystemId,
+				depositForm.ApplyInfo!.Settings.SystemKey);
+
 			await checkSigningCodeService
 				.ExecuteAsync(checkSigningCodeCommand)
 				.ConfigureAwait(false);

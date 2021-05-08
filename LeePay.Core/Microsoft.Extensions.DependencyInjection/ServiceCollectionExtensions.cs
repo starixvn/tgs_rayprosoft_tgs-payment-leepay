@@ -21,6 +21,16 @@ namespace Microsoft.Extensions.DependencyInjection
 					httpClient.BaseAddress = options.PaymentApiUrl;
 				})
 				.Services
+				.AddTransient<ILeePayClient>(sp =>
+				{
+					var options = sp.GetRequiredService<IOptions<LeePayOptions>>().Value;
+
+					if (options.IsSimulation)
+						return ActivatorUtilities.CreateInstance<LeePayEmulatorClient>(
+							sp, sp.GetRequiredService<LeePayClient>());
+					else
+						return sp.GetRequiredService<LeePayClient>();
+				})
 				.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient)
 				.AddSingleton<LeePayHasher>()
 				.AddNatsMessageQueue(config =>

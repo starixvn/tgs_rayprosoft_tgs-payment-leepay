@@ -10,11 +10,11 @@ namespace Tgs.Payment.LeePay
 {
 	internal class DepositProcessor : IMessageProcessor
 	{
-		private readonly LeePayClient _payClient;
 		private readonly LeePaySerializer _leePaySerializer;
 		private readonly ILogger<DepositProcessor> _logger;
+		private readonly ILeePayClient _payClient;
 
-		public DepositProcessor(LeePayClient payClient, LeePaySerializer leePaySerializer, ILogger<DepositProcessor> logger)
+		public DepositProcessor(ILeePayClient payClient, LeePaySerializer leePaySerializer, ILogger<DepositProcessor> logger)
 		{
 			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
 			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
@@ -83,8 +83,6 @@ namespace Tgs.Payment.LeePay
 
 				return msg.ToByteArray();
 			}
-
-			
 		}
 	}
 }

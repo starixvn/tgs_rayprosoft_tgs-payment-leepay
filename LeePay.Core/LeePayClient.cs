@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Tgs.Payment.LeePay
 {
-	internal class LeePayClient
+	internal class LeePayClient : ILeePayClient
 	{
 		private readonly HttpClient _httpClient;
 		private readonly JsonSerializerOptions? _jsonSerializerOptions;
