@@ -56,5 +56,16 @@ namespace Tgs.Payment.LeePay.Repositories
 
 			await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 		}
+
+		public async ValueTask SaveWithdrawReturnAsync(Guid id, LeePayWithdrawReturn withdrawReturn)
+		{
+			var form = await _dbContext.WithdrawForms
+				.FindAsync(id)
+				.ConfigureAwait(false);
+
+			form.PaymentReturn = _serializer.Serialize(withdrawReturn);
+
+			await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+		}
 	}
 }

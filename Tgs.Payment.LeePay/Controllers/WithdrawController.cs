@@ -27,6 +27,7 @@ namespace Tgs.Payment.LeePay.Controllers
 			[FromServices] IOptions<JsonOptions> jsonOptions,
 			[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
 			[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
+			[FromServices] ICommandService<SaveWithdrawReturnCommand> saveReturnService,
 			[FromBody] Dictionary<string, object> response)
 		{
 			var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
@@ -40,26 +41,44 @@ namespace Tgs.Payment.LeePay.Controllers
 
 			var withdrawResponse = JsonSerializer.Deserialize<WithdrawResponseViewModel>(json)!;
 
-			var depositForm = await getDepositFormService
+			var withdrawForm = await getDepositFormService
 				.GetAsync(new GetDepositFormQuery(withdrawResponse.CustomOrderNo))
 				.ConfigureAwait(false);
 
 			var checkSigningCodeCommand = new CheckSigningCodeCommand(
 				dict,
 				withdrawResponse.TranscationSigningCode,
-				depositForm.ApplyInfo!.Settings.SystemId,
-				depositForm.ApplyInfo!.Settings.SystemKey);
+				withdrawForm.ApplyInfo!.Settings.SystemId,
+				withdrawForm.ApplyInfo!.Settings.SystemKey);
 
 			await checkSigningCodeService
 				.ExecuteAsync(checkSigningCodeCommand)
 				.ConfigureAwait(false);
 
 			if (await checkSigningCodeCommand.CommandResultSource.Task.ConfigureAwait(false))
+			{
+				var returnData = new LeePayWithdrawReturn(
+					withdrawResponse.Channel,
+					withdrawResponse.CreatedAt,
+					withdrawResponse.CustomOrderNo,
+					withdrawResponse.Fee,
+					withdrawResponse.FeeRate,
+					withdrawResponse.NotifyCustomMessage,
+					withdrawResponse.OrderAmount,
+					withdrawResponse.OrderNo,
+					withdrawResponse.Status,
+					withdrawResponse.ToAddress,
+					withdrawResponse.TransactionHash);
+				var saveWithdrawCommand = new SaveWithdrawReturnCommand(withdrawForm.Id, returnData);
+
+				await saveReturnService.ExecuteAsync(saveWithdrawCommand).ConfigureAwait(false);
+
 				return new WithdrawConfirmViewModel
 				{
 					Code = "00",
 					Message = "Success"
 				};
+			}
 			else
 				throw new Exception();
 		}

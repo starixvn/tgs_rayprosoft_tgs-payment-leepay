@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<Version>0.0.6-alpha</Version>
+		<Version>0.0.7-alpha</Version>
 		<Authors>Raypro</Authors>
 		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-payment-leepay.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>

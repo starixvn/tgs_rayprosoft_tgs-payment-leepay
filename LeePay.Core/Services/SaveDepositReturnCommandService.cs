@@ -15,8 +15,6 @@ namespace Tgs.Payment.LeePay.Services
 		}
 
 		public ValueTask ExecuteAsync(SaveDepositReturnCommand command, CancellationToken cancellationToken = default)
-		{
-			return _tgsRepository.SaveDepositReturnAsync(command.FormId, command.ReturnData);
-		}
+			=> _tgsRepository.SaveDepositReturnAsync(command.FormId, command.ReturnData);
 	}
 }
