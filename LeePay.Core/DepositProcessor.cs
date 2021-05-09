@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
 
@@ -12,10 +13,16 @@ namespace Tgs.Payment.LeePay
 	{
 		private readonly LeePaySerializer _leePaySerializer;
 		private readonly ILogger<DepositProcessor> _logger;
+		private readonly LeePayOptions _options;
 		private readonly ILeePayClient _payClient;
 
-		public DepositProcessor(ILeePayClient payClient, LeePaySerializer leePaySerializer, ILogger<DepositProcessor> logger)
+		public DepositProcessor(
+			IOptions<LeePayOptions> optionsAccessor,
+			ILeePayClient payClient,
+			LeePaySerializer leePaySerializer,
+			ILogger<DepositProcessor> logger)
 		{
+			_options = optionsAccessor.Value;
 			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
 			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -30,7 +37,7 @@ namespace Tgs.Payment.LeePay
 			{
 				CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
 				Amount = decimal.Parse(request.Amount),
-				NotifyUrl = "https://payment.yggdrasill.dev/api/deposit/callback",
+				NotifyUrl = $"{_options.CallbackBaseUrl}/api/deposit/callback",
 				ReturnUrl = settings.ReturnUrl,
 				DepositLimitTime = 60,
 				ChannelCurrency = settings.ChannelCurrency,
