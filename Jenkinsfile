@@ -1,18 +1,24 @@
 pipeline {
-    agent any
+	agent any
 	
 	environment {
 		gitlab_user_pwd=credentials('gitlab-user-pwd')
-        BuildConfiguration="Debug"
+		BuildConfiguration="Debug"
 		ImageName="registry.gitlab.com/rayprosoft/turnkey-gaming-system/leepay"
 	}
 
-    stages {
-        stage('Build') {
-            steps {
-                sh 'dotnet build -c $BuildConfiguration'
-            }
-        }
+	stages {
+		stage('Build') {
+			steps {
+				sh 'dotnet build -c $BuildConfiguration'
+			}
+		}
+
+		stage('Test') {
+			steps {
+				sh 'dotnet test -c $BuildConfiguration --logger trx --no-build'
+			}
+		}
 		
 		stage('Push packages') {
 			steps {
@@ -48,8 +54,8 @@ pipeline {
 						def json = readJSON file: "$leepaydev";
 
 						env.TGS = json.tgs;
-                        env.PaymentApiUrl = json.paymentApiUrl;
-                        env.NatsUri = json.nats;
+						env.PaymentApiUrl = json.paymentApiUrl;
+						env.NatsUri = json.nats;
 
 						withKubeConfig([credentialsId: 'k8s-kube-config', serverUrl: 'https://192.168.50.105:6443']) {
 							sh '''
@@ -70,6 +76,12 @@ pipeline {
 					}
 				}
 			}
+		}
+	}
+
+	post {
+		always {
+			step([$class: 'MSTestPublisher', testResultsFile:"**/*.trx", failOnError: false, keepLongStdio: true])
 		}
 	}
 }
