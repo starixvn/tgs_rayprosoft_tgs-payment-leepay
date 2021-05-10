@@ -8,7 +8,7 @@ namespace Tgs.Payment.LeePay.ViewModels
 		public string CustomOrderNo { get; init; } = default!;
 
 		[JsonPropertyName("notifyCustomMsg")]
-		public string NotifyCustomMessage { get; init; } = default!;
+		public string? NotifyCustomMessage { get; init; }
 
 		public string OrderNo { get; init; } = default!;
 
@@ -26,7 +26,7 @@ namespace Tgs.Payment.LeePay.ViewModels
 
 		public string TransactionHash { get; init; } = default!;
 
-		public DateTimeOffset CreatedAt { get; init; }
+		public DateTimeOffset CreatedAt { get; init; } = default!;
 
 		public string Channel { get; init; } = default!;
 

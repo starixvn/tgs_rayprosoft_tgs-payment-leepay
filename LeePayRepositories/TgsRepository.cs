@@ -20,6 +20,7 @@ namespace Tgs.Payment.LeePay.Repositories
 			var data = await _dbContext.DepositForms.FindAsync(id).ConfigureAwait(false);
 
 			return new DepositFormInfo(
+				data.Id,
 				data.PlayerCode,
 				data.BrandId,
 				data.BrandPaymentId,
@@ -43,6 +44,28 @@ namespace Tgs.Payment.LeePay.Repositories
 				data.BankInfo,
 				_serializer.Deserialize<LeePayWithdrawApplyInfo>(data.ApplyInfo),
 				data.PaymentReturn);
+		}
+
+		public async ValueTask SaveDepositReturnAsync(Guid id, LeePayDepositReturn depositReturn)
+		{
+			var form = await _dbContext.DepositForms
+				.FindAsync(id)
+				.ConfigureAwait(false);
+
+			form.PaymentReturn = _serializer.Serialize(depositReturn);
+
+			await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+		}
+
+		public async ValueTask SaveWithdrawReturnAsync(Guid id, LeePayWithdrawReturn withdrawReturn)
+		{
+			var form = await _dbContext.WithdrawForms
+				.FindAsync(id)
+				.ConfigureAwait(false);
+
+			form.PaymentReturn = _serializer.Serialize(withdrawReturn);
+
+			await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 		}
 	}
 }

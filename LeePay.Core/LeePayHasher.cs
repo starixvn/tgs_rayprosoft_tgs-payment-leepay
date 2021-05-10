@@ -10,7 +10,9 @@ namespace Tgs.Payment.LeePay
 	{
 		public string ComputeHash(string systemId, string systemKey, IDictionary<string, object> dict)
 		{
-			var content = string.Join("&", dict.OrderBy(p => p.Key).Select(p => $"{p.Key}={p.Value}"));
+			var content = string.Join(
+				"&",
+				dict.OrderBy(p => p.Key).Select(p => $"{p.Key}={p.Value ?? "null"}"));
 
 			var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
 

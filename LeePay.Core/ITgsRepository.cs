@@ -8,5 +8,9 @@ namespace Tgs.Payment.LeePay
 		ValueTask<DepositFormInfo> GetDepositFormByIdAsync(Guid id);
 
 		ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid id);
+
+		ValueTask SaveDepositReturnAsync(Guid id, LeePayDepositReturn depositReturn);
+
+		ValueTask SaveWithdrawReturnAsync(Guid id, LeePayWithdrawReturn withdrawReturn);
 	}
 }

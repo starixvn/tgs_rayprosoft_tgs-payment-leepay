@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
 
@@ -12,10 +13,16 @@ namespace Tgs.Payment.LeePay
 	{
 		private readonly LeePaySerializer _leePaySerializer;
 		private readonly ILogger<WithdrawProcessor> _logger;
-		private readonly LeePayClient _payClient;
+		private readonly LeePayOptions _options;
+		private readonly ILeePayClient _payClient;
 
-		public WithdrawProcessor(LeePayClient payClient, LeePaySerializer leePaySerializer, ILogger<WithdrawProcessor> logger)
+		public WithdrawProcessor(
+			IOptions<LeePayOptions> optionsAccessor,
+			ILeePayClient payClient,
+			LeePaySerializer leePaySerializer,
+			ILogger<WithdrawProcessor> logger)
 		{
+			_options = optionsAccessor.Value;
 			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
 			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -31,7 +38,7 @@ namespace Tgs.Payment.LeePay
 				CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
 				Amount = decimal.Parse(request.Amount),
 				DestinationAddress = settings.DestinationAddress,
-				NotifyUrl = "https://payment.yggdrasill.dev/api/withdraw/callback",
+				NotifyUrl = $"{_options.CallbackBaseUrl}/api/withdraw/callback",
 				ChannelCurrency = settings.ChannelCurrency,
 				Channel = string.IsNullOrEmpty(settings.Channel) ? null : settings.Channel
 			};
