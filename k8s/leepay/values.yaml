@@ -12,30 +12,21 @@ image:
 
 namaespace: dev
 
+nameOverride: "payment-leepay"
+fullnameOverride: "payment-leepay"
+
 connectionStrings:
   tgs: Server=localhost;Database=tgs;User Id=tgs;Password=1qaz2wsx!@
 
 nats: nats://localhost:4222
 
 paymentApiUrl: https://api.leepay-wallet.com
+callbackBaseUrl: https://payment.yggdrasill.dev
 
-# 狀態為可以最小秒數
-minReadySeconds: 8 
-
-strategy:
-  # 使用RollingUpdate類型, 可以保證佈署期間服務不中斷
-  type: RollingUpdate 
-  rollingUpdate:
-    # 佈署期間允許最大停止pod數量(replicas)
-    maxUnavailable: 1 
-    # 佈署期間允許最大建立pod數量(replicas)
-    maxSurge: 2 
+simulation: true
 
 imagePullSecrets:
   - name: registry-credentials
-
-nameOverride: "payment-leepay"
-fullnameOverride: "payment-leepay"
 
 podAnnotations: {}
 

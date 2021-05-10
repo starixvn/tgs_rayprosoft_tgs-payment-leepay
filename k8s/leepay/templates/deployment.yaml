@@ -7,7 +7,6 @@ metadata:
     {{- include "leepay.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  minReadySeconds: {{ .Values.minReadySeconds }}
   strategy:
     {{- toYaml .Values.strategy | nindent 4 }}
   selector:
@@ -38,6 +37,9 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
+          env:
+            - name: LeePay__IsSimulation
+              value: {{ .Values.simulation }}
           volumeMounts:
             - mountPath: /config/appsettings.json
               name: appsettings
