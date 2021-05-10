@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using NUnit.Framework;
 
 namespace Tgs.Payment.LeePay.Tests
@@ -20,7 +23,7 @@ namespace Tgs.Payment.LeePay.Tests
 				["date"] = DateTimeOffset.Parse("2021-05-07T06:39:14.530Z")
 			};
 
-			var expected = "C733A72537156F035A8C4CF04EE1AF58808A71FB1DC47F3081F6813F4F503044";
+			var expected = HashCode(systemId, systemKey, "date=2021-05-07T06:39:14.530Z");
 
 			var actual = sut.ComputeHash(systemId, systemKey, dict);
 
@@ -40,11 +43,24 @@ namespace Tgs.Payment.LeePay.Tests
 				["data"] = null
 			};
 
-			var expected = "C10F2D65A24B2DCBA95C789668FBF0B200E5166EB9226C07F84BF43ECA1B9C57";
+			var expected = HashCode(systemId, systemKey, "data=null");
 
 			var actual = sut.ComputeHash(systemId, systemKey, dict);
 
 			Assert.AreEqual(expected, actual);
+		}
+
+		private string HashCode(string systemId, string systemKey, string content)
+		{
+			var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
+
+			var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
+
+			var hash = string.Join(
+				string.Empty,
+				SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
+
+			return hash;
 		}
 	}
 }

@@ -12,7 +12,13 @@ namespace Tgs.Payment.LeePay
 		{
 			var content = string.Join(
 				"&",
-				dict.OrderBy(p => p.Key).Select(p => $"{p.Key}={p.Value ?? "null"}"));
+				dict.OrderBy(p => p.Key).Select(p =>
+				{
+					if (p.Value is DateTimeOffset)
+						return $"{p.Key}={p.Value:yyyy-MM-ddTHH:mm:ss.fffZ}";
+					else
+						return $"{p.Key}={p.Value ?? "null"}";
+				}));
 
 			var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
 
