@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Tgs.Payment.LeePay
 {
 	internal class LeePayEmulatorClient : ILeePayClient
 	{
+		private readonly LeePayOptions _options;
 		private readonly ILeePayClient _realClient;
 
-		public LeePayEmulatorClient(ILeePayClient realClient)
+		public LeePayEmulatorClient(ILeePayClient realClient, IOptions<LeePayOptions> optionsAccessor)
 		{
 			_realClient = realClient ?? throw new ArgumentNullException(nameof(realClient));
+			_options = optionsAccessor.Value;
 		}
 
 		public ValueTask<LeePayResponse<DepositResult>> DepositAsync(string systemId, string systemKey, DepositOrder order)
@@ -24,7 +27,8 @@ namespace Tgs.Payment.LeePay
 					UsdtAmount = order.Amount,
 					ChannelCurrency = order.ChannelCurrency,
 					ChannelRate = 1,
-					Channel = order.Channel ?? "ETHEREUM"
+					Channel = order.Channel ?? "ETHEREUM",
+					PaymentUrl = $"{_options.CallbackBaseUrl}/api/deposit/payment/{new Guid(Convert.FromBase64String(order.CustomOrderNo))}"
 				}
 			});
 

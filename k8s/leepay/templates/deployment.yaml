@@ -39,7 +39,7 @@ spec:
               protocol: TCP
           env:
             - name: LeePay__IsSimulation
-              value: {{ .Values.simulation }}
+              value: "{{ .Values.simulation }}"
           volumeMounts:
             - mountPath: /config/appsettings.json
               name: appsettings
