@@ -41,7 +41,7 @@ Common labels
 Selector labels
 */}}
 {{- define "leepay.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "leepay.name" . }}
+app: {{ include "leepay.name" . }}
 {{- end }}
 
 {{/*
