@@ -35,6 +35,7 @@ namespace Tgs.Payment.LeePay.Repositories
 			var data = await _dbContext.WithdrawForms.FindAsync(id).ConfigureAwait(false);
 
 			return new WithdrawFormInfo(
+				data.Id,
 				data.PlayerCode,
 				data.BrandId,
 				data.BrandPaymentId,
