@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
 using System;
 
+#nullable disable
 
 namespace LeePayRepositories.Entities.Configurations
 {
@@ -23,6 +24,10 @@ namespace LeePayRepositories.Entities.Configurations
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
+
+            entity.Property(e => e.ActualAmount)
+                .HasPrecision(18, 6)
+                .HasColumnName("actual_amount");
 
             entity.Property(e => e.Amount)
                 .HasPrecision(18, 6)
@@ -49,6 +54,8 @@ namespace LeePayRepositories.Entities.Configurations
                 .IsRequired()
                 .HasMaxLength(16)
                 .HasColumnName("player_code");
+
+            entity.Property(e => e.PromotionId).HasColumnName("promotion_id");
 
             entity.Property(e => e.Remark).HasColumnName("remark");
 

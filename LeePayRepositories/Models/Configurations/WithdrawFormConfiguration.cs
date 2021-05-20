@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
 using System;
 
+#nullable disable
 
 namespace LeePayRepositories.Entities.Configurations
 {
@@ -24,7 +25,13 @@ namespace LeePayRepositories.Entities.Configurations
                 .ValueGeneratedNever()
                 .HasColumnName("id");
 
-            entity.Property(e => e.Amount).HasColumnName("amount");
+            entity.Property(e => e.ActualAmount)
+                .HasPrecision(18, 6)
+                .HasColumnName("actual_amount");
+
+            entity.Property(e => e.Amount)
+                .HasPrecision(18, 6)
+                .HasColumnName("amount");
 
             entity.Property(e => e.ApplyInfo)
                 .HasColumnType("jsonb")
