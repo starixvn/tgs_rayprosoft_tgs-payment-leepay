@@ -28,7 +28,7 @@ namespace Tgs.Payment.LeePay
 					ChannelCurrency = order.ChannelCurrency,
 					ChannelRate = 1,
 					Channel = order.Channel ?? "ETHEREUM",
-					PaymentUrl = $"{_options.CallbackBaseUrl}/api/deposit/payment/{new Guid(Convert.FromBase64String(order.CustomOrderNo))}"
+					PaymentUrl = $"{_options.CallbackBaseUrl}/deposit/payment/{new Guid(Convert.FromBase64String(order.CustomOrderNo))}"
 				}
 			});
 
