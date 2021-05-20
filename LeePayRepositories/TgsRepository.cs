@@ -54,6 +54,7 @@ namespace Tgs.Payment.LeePay.Repositories
 				.ConfigureAwait(false);
 
 			form.Status = 1000;
+			form.ActualAmount = decimal.Parse(depositReturn.ActualAmount);
 			form.PaymentReturn = _serializer.Serialize(depositReturn);
 
 			await _dbContext.SaveChangesAsync().ConfigureAwait(false);
