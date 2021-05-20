@@ -37,7 +37,7 @@ namespace Tgs.Payment.LeePay
 			{
 				CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
 				Amount = decimal.Parse(request.Amount),
-				NotifyUrl = $"{_options.CallbackBaseUrl}/api/deposit/callback",
+				NotifyUrl = $"{_options.CallbackBaseUrl}/deposit/callback",
 				ReturnUrl = settings.ReturnUrl,
 				DepositLimitTime = 60,
 				ChannelCurrency = settings.ChannelCurrency,
