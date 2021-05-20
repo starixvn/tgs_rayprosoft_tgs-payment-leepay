@@ -11,7 +11,7 @@ using TGS.ServiceUtility;
 
 namespace Tgs.Payment.LeePay.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("[controller]")]
 	[ApiController]
 	public class WithdrawController : ControllerBase
 	{
@@ -25,7 +25,7 @@ namespace Tgs.Payment.LeePay.Controllers
 		[HttpPost("callback")]
 		public async Task<WithdrawConfirmViewModel> WithdrawCallbackAsync(
 			[FromServices] IOptions<JsonOptions> jsonOptions,
-			[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+			[FromServices] IGetService<GetWithdrawFormQuery, WithdrawFormInfo> getWithdrawFormService,
 			[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
 			[FromServices] ICommandService<SaveWithdrawReturnCommand> saveReturnService,
 			[FromBody] Dictionary<string, object> response)
@@ -41,8 +41,8 @@ namespace Tgs.Payment.LeePay.Controllers
 
 			var withdrawResponse = JsonSerializer.Deserialize<WithdrawResponseViewModel>(json)!;
 
-			var withdrawForm = await getDepositFormService
-				.GetAsync(new GetDepositFormQuery(withdrawResponse.CustomOrderNo))
+			var withdrawForm = await getWithdrawFormService
+				.GetAsync(new GetWithdrawFormQuery(withdrawResponse.CustomOrderNo))
 				.ConfigureAwait(false);
 
 			var checkSigningCodeCommand = new CheckSigningCodeCommand(

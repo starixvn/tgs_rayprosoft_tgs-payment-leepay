@@ -11,7 +11,7 @@ using TGS.ServiceUtility;
 
 namespace Tgs.Payment.LeePay.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("[controller]")]
 	[ApiController]
 	public class DepositController : ControllerBase
 	{

@@ -38,7 +38,7 @@ namespace Tgs.Payment.LeePay
 				CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
 				Amount = decimal.Parse(request.Amount),
 				DestinationAddress = settings.DestinationAddress,
-				NotifyUrl = $"{_options.CallbackBaseUrl}/api/withdraw/callback",
+				NotifyUrl = $"{_options.CallbackBaseUrl}/withdraw/callback",
 				ChannelCurrency = settings.ChannelCurrency,
 				Channel = string.IsNullOrEmpty(settings.Channel) ? null : settings.Channel
 			};
