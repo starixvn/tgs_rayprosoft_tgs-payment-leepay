@@ -16,10 +16,10 @@ namespace Tgs.Payment.LeePay.Services
 
 		public ValueTask<WithdrawFormInfo> GetAsync(GetWithdrawFormQuery query, CancellationToken cancellationToken = default)
 		{
-			var depositFormId = new Guid(Convert.FromBase64String(query.CustomOrderNo));
+			var withdrawFormId = new Guid(Convert.FromBase64String(query.CustomOrderNo));
 
 			return _tgsRepository
-				.GetWithdrawFormByIdAsync(depositFormId);
+				.GetWithdrawFormByIdAsync(withdrawFormId);
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using System.Reflection;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.LeePay.MessageQueue;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
