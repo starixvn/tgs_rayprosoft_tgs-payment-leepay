@@ -44,7 +44,7 @@ namespace LeePayTest
 				"TRON");
 
 			var withdrawReturn = await _paymentClient
-				.WithdrawAsync("tgs.payment.leepay.withdraw", 10M, _leePaySerializer.Serialize(withdrawSettings))
+				.WithdrawAsync("tgs.payment.leepay.withdraw", 0M, _leePaySerializer.Serialize(withdrawSettings))
 				.ConfigureAwait(false);
 		}
 	}

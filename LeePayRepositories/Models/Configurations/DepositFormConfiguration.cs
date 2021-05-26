@@ -15,11 +15,11 @@ namespace LeePayRepositories.Entities.Configurations
         {
             entity.ToTable("deposit_forms", "dbo");
 
-            entity.HasIndex(e => e.BrandId);
+            entity.HasIndex(e => e.BrandId, "ix_deposit_forms_brandId");
 
-            entity.HasIndex(e => e.BrandPaymentId);
+            entity.HasIndex(e => e.BrandPaymentId, "ix_deposit_forms_brand_payment_id");
 
-            entity.HasIndex(e => e.PlayerCode);
+            entity.HasIndex(e => e.PlayerCode, "ix_deposit_forms_playerCode");
 
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()

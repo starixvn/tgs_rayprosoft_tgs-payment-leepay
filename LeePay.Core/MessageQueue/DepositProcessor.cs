@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
 
-namespace Tgs.Payment.LeePay
+namespace Tgs.Payment.LeePay.MessageQueue
 {
 	internal class DepositProcessor : IMessageProcessor
 	{

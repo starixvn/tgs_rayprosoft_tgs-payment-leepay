@@ -10,7 +10,13 @@ namespace LeePayTest
 			Host.CreateDefaultBuilder(args)
 				.ConfigureServices(services =>
 				{
-					services.AddNatsMessageQueue(config => { });
+					services.AddNatsMessageQueue(config =>
+					{
+						config.ConfigQueueOptions((options, ap) =>
+						{
+							options.Url = "nats://192.168.50.106:30022";
+						});
+					});
 					services.AddPaymentClient();
 					services
 						.AddSystemJsonSerializer()
