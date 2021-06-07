@@ -46,17 +46,6 @@ namespace LeePayTest
 			var withdrawReturn = await _paymentClient
 				.WithdrawAsync("tgs.payment.leepay.withdraw", 0M, _leePaySerializer.Serialize(withdrawSettings))
 				.ConfigureAwait(false);
-
-			//var exchangeRateSettings = new LeePayExchangeRateSettings(
-			//	"WG",
-			//	"7ujm5tgB",
-			//	"CNY",
-			//	"USDT"
-			//	);
-
-			//var exchangeReturn = await _paymentClient
-			//	.ExchangeRateAsync("tgs.payment.leepay.exchangerate", 0M, _leePaySerializer.Serialize(exchangeRateSettings))
-			//	.ConfigureAwait(false);
 		}
 	}
 }

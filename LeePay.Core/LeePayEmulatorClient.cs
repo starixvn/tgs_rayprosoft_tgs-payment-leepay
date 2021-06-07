@@ -47,17 +47,5 @@ namespace Tgs.Payment.LeePay
 					Channel = order.Channel ?? "ETHEREUM"
 				}
 			});
-
-		public ValueTask<LeePayResponse<ExchangeRateResult>> ExchangeRateAsync(string systemId, string systemKey, ExchangeRateOrder order)
-			=> ValueTask.FromResult(new LeePayResponse<ExchangeRateResult>
-			{
-				Code = "00",
-				Data = new ExchangeRateResult
-				{
-					BuyPrice = 6.35M,
-					SellPrice = 6.36M,
-					BizTime = "2021-06-07T09:23:00.000Z"
-				}
-			});
 	}
 }
