@@ -92,7 +92,7 @@ namespace Tgs.Payment.LeePay
 			return _hasher.ComputeHash(systemId, systemKey, dict);
 		}
 
-		public async ValueTask<LeePayResponse<ExchangeRateResult>> ExchangeRateAsync(string systemId, string systemKey, ExchangeRateOrder order)
+		public async ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(string systemId, string systemKey, QueryExchangeRateOrder order)
 		{
 			order.TranscationSigningCode = ComputeHash(systemId, systemKey, order);
 
@@ -112,7 +112,7 @@ namespace Tgs.Payment.LeePay
 
 			_logger.LogInformation($"ExchangeRate Body: {bodyJson}");
 
-			var result = JsonSerializer.Deserialize<LeePayResponse<ExchangeRateResult>>(bodyJson, _jsonSerializerOptions);
+			var result = JsonSerializer.Deserialize<LeePayResponse<QueryExchangeRateResult>>(bodyJson, _jsonSerializerOptions);
 
 			result!.OriginalResponse = bodyJson;
 

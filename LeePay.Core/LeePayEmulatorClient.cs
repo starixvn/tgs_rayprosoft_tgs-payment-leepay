@@ -48,11 +48,11 @@ namespace Tgs.Payment.LeePay
 				}
 			});
 
-		public ValueTask<LeePayResponse<ExchangeRateResult>> ExchangeRateAsync(string systemId, string systemKey, ExchangeRateOrder order)
-			=> ValueTask.FromResult(new LeePayResponse<ExchangeRateResult>
+		public ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(string systemId, string systemKey, QueryExchangeRateOrder order)
+			=> ValueTask.FromResult(new LeePayResponse<QueryExchangeRateResult>
 			{
 				Code = "00",
-				Data = new ExchangeRateResult
+				Data = new QueryExchangeRateResult
 				{
 					BuyPrice = 6.35M + decimal.Parse(new Random().NextDouble().ToString()),
 					SellPrice = 6.36M + decimal.Parse(new Random().NextDouble().ToString()),

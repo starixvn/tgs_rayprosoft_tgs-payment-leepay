@@ -1,6 +1,6 @@
 ﻿namespace Tgs.Payment.LeePay
 {
-	public record LeePayExchangeRateResponse(
+	public record LeePayQueryExchangeRateResponse(
 		string Code,
 		decimal? BuyPrice = null,
 		decimal? SellPrice = null,

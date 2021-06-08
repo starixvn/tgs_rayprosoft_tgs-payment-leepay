@@ -1,6 +1,6 @@
 ﻿namespace Tgs.Payment.LeePay
 {
-	internal class ExchangeRateResult
+	internal class QueryExchangeRateResult
 	{
 		/// <summary>
 		/// 交易所收購價格，建議用來充值使用

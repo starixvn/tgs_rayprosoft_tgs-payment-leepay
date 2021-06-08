@@ -2,7 +2,7 @@
 
 namespace Tgs.Payment.LeePay
 {
-	internal class ExchangeRateOrder
+	internal class QueryExchangeRateOrder
 	{
 		[JsonPropertyName("from")]
 		public string From { get; set; } = default!;

@@ -1,6 +1,6 @@
 ﻿namespace Tgs.Payment.LeePay
 {
-	public record LeePayExchangeRateSettings(
+	public record LeePayQueryExchangeRateSettings(
 		string SystemId,
 		string SystemKey,
 		string From,

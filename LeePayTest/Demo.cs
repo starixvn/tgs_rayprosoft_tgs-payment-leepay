@@ -47,7 +47,7 @@ namespace LeePayTest
 			//	.WithdrawAsync("tgs.payment.leepay.withdraw", 0M, _leePaySerializer.Serialize(withdrawSettings))
 			//	.ConfigureAwait(false);
 
-			var exchangeRateSettings = new LeePayExchangeRateSettings(
+			var exchangeRateSettings = new LeePayQueryExchangeRateSettings(
 				"WG",
 				"7ujm5tgB",
 				"CNY",
@@ -55,7 +55,7 @@ namespace LeePayTest
 				);
 
 			var exchangeReturn = await _paymentClient
-				.AskAsync("tgs.payment.leepay.exchangerate", _leePaySerializer.Serialize(exchangeRateSettings))
+				.AskAsync("tgs.payment.leepay.queryexchangerate", _leePaySerializer.Serialize(exchangeRateSettings))
 				.ConfigureAwait(false);
 
 			Console.WriteLine(exchangeReturn);

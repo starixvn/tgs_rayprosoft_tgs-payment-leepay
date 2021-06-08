@@ -45,7 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
 						})
 						.AddProcessor<DepositProcessor>("tgs.payment.leepay.deposit", "tgs.payment.leepay.deposit")
 						.AddProcessor<WithdrawProcessor>("tgs.payment.leepay.withdraw", "tgs.payment.leepay.withdraw")
-						.AddProcessor<ExchangeRateProcessor>("tgs.payment.leepay.exchangerate");
+						.AddProcessor<QueryExchangeRateProcessor>("tgs.payment.leepay.queryexchangerate");
 				});
 		}
 	}

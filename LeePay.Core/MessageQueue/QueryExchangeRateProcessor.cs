@@ -9,18 +9,18 @@ using Tgs.Payment.Protos;
 
 namespace Tgs.Payment.LeePay.MessageQueue
 {
-	internal class ExchangeRateProcessor : IMessageProcessor
+	internal class QueryExchangeRateProcessor : IMessageProcessor
 	{
 		private readonly LeePaySerializer _leePaySerializer;
-		private readonly ILogger<ExchangeRateProcessor> _logger;
+		private readonly ILogger<QueryExchangeRateProcessor> _logger;
 		private readonly LeePayOptions _options;
 		private readonly ILeePayClient _payClient;
 
-		public ExchangeRateProcessor(
+		public QueryExchangeRateProcessor(
 			IOptions<LeePayOptions> optionsAccessor,
 			ILeePayClient payClient,
 			LeePaySerializer leePaySerializer,
-			ILogger<ExchangeRateProcessor> logger)
+			ILogger<QueryExchangeRateProcessor> logger)
 		{
 			_options = optionsAccessor.Value;
 			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
@@ -31,29 +31,29 @@ namespace Tgs.Payment.LeePay.MessageQueue
 		public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
 		{
 			var request = GeneralRequest.Parser.ParseFrom(data);
-			var settings = _leePaySerializer.Deserialize<LeePayExchangeRateSettings>(request.Content);
+			var settings = _leePaySerializer.Deserialize<LeePayQueryExchangeRateSettings>(request.Content);
 
-			var order = new ExchangeRateOrder
+			var order = new QueryExchangeRateOrder
 			{
 				From = settings.From,
 				To = settings.To
 			};
 
 			var result = await _payClient
-				.ExchangeRateAsync(settings.SystemId, settings.SystemKey, order)
+				.QueryExchangeRateAsync(settings.SystemId, settings.SystemKey, order)
 				.ConfigureAwait(false);
 
 			var orderResult = result.Data!;
 
 			if (result.Code == "00")
 			{
-				var response = new LeePayExchangeRateResponse(
+				var response = new LeePayQueryExchangeRateResponse(
 					result.Code,
 					orderResult.BuyPrice,
 					orderResult.SellPrice,
 					orderResult.BizTime);
 
-				var applyInfo = new LeePayExchangeRateApplyInfo(settings, response);
+				var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
 
 				var msg = new WithdrawResponse
 				{
@@ -64,7 +64,7 @@ namespace Tgs.Payment.LeePay.MessageQueue
 			}
 			else
 			{
-				var response = new LeePayExchangeRateResponse(
+				var response = new LeePayQueryExchangeRateResponse(
 					result.Code,
 					null,
 					null,
@@ -76,7 +76,7 @@ namespace Tgs.Payment.LeePay.MessageQueue
 					result.Timestamp,
 					result.Path);
 
-				var applyInfo = new LeePayExchangeRateApplyInfo(settings, response);
+				var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
 
 				var msg = new GeneralResponse
 				{
