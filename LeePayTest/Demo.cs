@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 
 namespace LeePayTest
@@ -35,17 +35,30 @@ namespace LeePayTest
 			//	.DepositAsync("tgs.payment.leepay.deposit", 2M, _leePaySerializer.Serialize(settings))
 			//	.ConfigureAwait(false);
 
-			var withdrawSettings = new LeePayWithdrawSettings(
+			//var withdrawSettings = new LeePayWithdrawSettings(
+			//	"WG",
+			//	"7ujm5tgB",
+			//	Guid.NewGuid(),
+			//	"TPRRBg6zL54vm8AHpbLJAeYqem4ntJsUKa",
+			//	"USDT",
+			//	"TRON");
+
+			//var withdrawReturn = await _paymentClient
+			//	.WithdrawAsync("tgs.payment.leepay.withdraw", 0M, _leePaySerializer.Serialize(withdrawSettings))
+			//	.ConfigureAwait(false);
+
+			var exchangeRateSettings = new LeePayQueryExchangeRateSettings(
 				"WG",
 				"7ujm5tgB",
-				Guid.NewGuid(),
-				"TPRRBg6zL54vm8AHpbLJAeYqem4ntJsUKa",
-				"USDT",
-				"TRON");
+				"CNY",
+				"USDT"
+				);
 
-			var withdrawReturn = await _paymentClient
-				.WithdrawAsync("tgs.payment.leepay.withdraw", 0M, _leePaySerializer.Serialize(withdrawSettings))
+			var exchangeReturn = await _paymentClient
+				.AskAsync("tgs.payment.leepay.queryexchangerate", _leePaySerializer.Serialize(exchangeRateSettings))
 				.ConfigureAwait(false);
+
+			Console.WriteLine(exchangeReturn);
 		}
 	}
 }

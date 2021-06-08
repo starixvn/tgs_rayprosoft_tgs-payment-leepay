@@ -91,5 +91,32 @@ namespace Tgs.Payment.LeePay
 
 			return _hasher.ComputeHash(systemId, systemKey, dict);
 		}
+
+		public async ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(string systemId, string systemKey, QueryExchangeRateOrder order)
+		{
+			order.TranscationSigningCode = ComputeHash(systemId, systemKey, order);
+
+			var requestContent = new StringContent(SerializeObject(order));
+			requestContent.Headers.Add("SYSTEM_ID", systemId);
+			requestContent.Headers.Add("SYSTEM_KEY", systemKey);
+
+			requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
+
+			var response = await _httpClient
+				.PostAsync("/rate/exchange", requestContent)
+				.ConfigureAwait(false);
+
+			_logger.LogInformation($"ExchangeRate StatusCode: {response.StatusCode}");
+
+			var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+			_logger.LogInformation($"ExchangeRate Body: {bodyJson}");
+
+			var result = JsonSerializer.Deserialize<LeePayResponse<QueryExchangeRateResult>>(bodyJson, _jsonSerializerOptions);
+
+			result!.OriginalResponse = bodyJson;
+
+			return result!;
+		}
 	}
 }
