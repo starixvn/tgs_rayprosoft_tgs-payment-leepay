@@ -58,7 +58,9 @@ namespace Tgs.Payment.LeePay.Controllers
 
 			if (await checkSigningCodeCommand.CommandResultSource.Task.ConfigureAwait(false))
 			{
-				var returnData = new LeePayDepositReturn(
+				if (depositForm.Status < 1000)
+				{
+					var returnData = new LeePayDepositReturn(
 					depositResponse.CustomOrderNo,
 					depositResponse.NotifyCustomMessage,
 					depositResponse.OrderNo,
@@ -72,13 +74,14 @@ namespace Tgs.Payment.LeePay.Controllers
 					depositResponse.CreatedAt,
 					depositResponse.Channel,
 					depositResponse.ActualAmount);
-				var saveReturnCommand = new SaveDepositReturnCommand(depositForm.Id, returnData);
+					var saveReturnCommand = new SaveDepositReturnCommand(depositForm.Id, returnData);
 
-				await saveReturnService.ExecuteAsync(saveReturnCommand).ConfigureAwait(false);
+					await saveReturnService.ExecuteAsync(saveReturnCommand).ConfigureAwait(false);
 
-				var approveCommand = new ApproveDepositFormCommand(depositForm.Id, depositForm.BrandId);
+					var approveCommand = new ApproveDepositFormCommand(depositForm.Id, depositForm.BrandId);
 
-				await approveService.ExecuteAsync(approveCommand).ConfigureAwait(false);
+					await approveService.ExecuteAsync(approveCommand).ConfigureAwait(false);
+				}
 
 				return new DepositConfirmViewModel
 				{
