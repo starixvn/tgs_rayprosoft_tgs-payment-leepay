@@ -28,6 +28,7 @@ namespace Tgs.Payment.LeePay.Controllers
 			[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
 			[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
 			[FromServices] ICommandService<SaveDepositReturnCommand> saveReturnService,
+			[FromServices] ICommandService<ApproveDepositFormCommand> approveService,
 			[FromBody] Dictionary<string, object> response)
 		{
 			var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
@@ -75,6 +76,10 @@ namespace Tgs.Payment.LeePay.Controllers
 
 				await saveReturnService.ExecuteAsync(saveReturnCommand).ConfigureAwait(false);
 
+				var approveCommand = new ApproveDepositFormCommand(depositForm.Id, depositForm.BrandId);
+
+				await approveService.ExecuteAsync(approveCommand).ConfigureAwait(false);
+
 				return new DepositConfirmViewModel
 				{
 					Code = "00",
@@ -90,6 +95,7 @@ namespace Tgs.Payment.LeePay.Controllers
 			[FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
 			[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
 			[FromServices] ICommandService<SaveDepositReturnCommand> saveReturnService,
+			[FromServices] ICommandService<ApproveDepositFormCommand> approveService,
 			[FromServices] LeePayHasher hasher,
 			[FromServices] IOptions<JsonOptions> jsonOptions,
 			Guid formId)
@@ -135,6 +141,7 @@ namespace Tgs.Payment.LeePay.Controllers
 				getDepositFormService,
 				checkSigningCodeService,
 				saveReturnService,
+				approveService,
 				dict).ConfigureAwait(false);
 		}
 	}
