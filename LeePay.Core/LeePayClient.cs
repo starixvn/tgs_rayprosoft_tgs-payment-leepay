@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Mime;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -92,9 +95,28 @@ namespace Tgs.Payment.LeePay
 			return _hasher.ComputeHash(systemId, systemKey, dict);
 		}
 
+		private string ComputeHashExchangeRate(string systemId, string systemKey, QueryExchangeRateOrder order)
+		{
+			var from = order.From;
+			var to = order.To;
+			var parmStr = $"from={from}&to={to}";
+			var fullText = $"SYSTEM_ID={systemId}&{parmStr}&SYSTEM_KEY={systemKey}";
+			var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
+			var hash = string.Join(
+				string.Empty,
+				SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
+			return hash;
+		}
+
 		public async ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(string systemId, string systemKey, QueryExchangeRateOrder order)
 		{
-			order.TranscationSigningCode = ComputeHash(systemId, systemKey, order);
+			order.TranscationSigningCode = ComputeHash(
+				systemId,
+				systemKey,
+				new Dictionary<string, string>(){
+					{ "from", order.From },
+					{ "to", order.To }
+				});
 
 			var requestContent = new StringContent(SerializeObject(order));
 			requestContent.Headers.Add("SYSTEM_ID", systemId);
