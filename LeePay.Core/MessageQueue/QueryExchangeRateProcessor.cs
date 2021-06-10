@@ -55,7 +55,7 @@ namespace Tgs.Payment.LeePay.MessageQueue
 
 				var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
 
-				var msg = new WithdrawResponse
+				var msg = new GeneralResponse
 				{
 					Result = _leePaySerializer.Serialize(applyInfo)
 				};
