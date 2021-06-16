@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Tgs.Payment.LeePay
 {
@@ -15,6 +16,10 @@ namespace Tgs.Payment.LeePay
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
 					webBuilder.UseStartup<Startup>();
+				})
+				.ConfigureLogging((ctx, builder) =>
+				{
+					builder.AddTgsLog();
 				});
 
 		public static void Main(string[] args)
