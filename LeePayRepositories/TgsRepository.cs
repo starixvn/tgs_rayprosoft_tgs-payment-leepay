@@ -43,7 +43,7 @@ namespace Tgs.Payment.LeePay.Repositories
 				data.Status,
 				data.BankInfoId,
 				data.BankInfo,
-				_serializer.Deserialize<LeePayWithdrawApplyInfo>(data.ApplyInfo),
+				_serializer.Deserialize<LeePayWithdrawApplyInfo>(data.ApplyInfo!),
 				data.PaymentReturn);
 		}
 
@@ -54,7 +54,8 @@ namespace Tgs.Payment.LeePay.Repositories
 				.ConfigureAwait(false);
 
 			form.Status = 1000;
-			form.ActualAmount = decimal.Parse(depositReturn.ActualAmount);
+			form.ActualAmount = Math.Floor(
+				decimal.Parse(depositReturn.ActualAmount) * depositReturn.ChannelCurrencyRate * 100M) / 100M;
 			form.PaymentReturn = _serializer.Serialize(depositReturn);
 
 			await _dbContext.SaveChangesAsync().ConfigureAwait(false);
