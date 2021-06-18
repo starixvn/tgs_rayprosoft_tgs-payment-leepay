@@ -33,14 +33,12 @@ namespace Tgs.Payment.LeePay.MessageQueue
 			var request = GeneralRequest.Parser.ParseFrom(data);
 			var settings = _leePaySerializer.Deserialize<LeePayQueryExchangeRateSettings>(request.Content);
 
-			var order = new QueryExchangeRateOrder
-			{
-				From = settings.From,
-				To = settings.To
-			};
-
 			var result = await _payClient
-				.QueryExchangeRateAsync(settings.SystemId, settings.SystemKey, order)
+				.QueryExchangeRateAsync(
+					settings.SystemId,
+					settings.SystemKey,
+					settings.From,
+					settings.To)
 				.ConfigureAwait(false);
 
 			var orderResult = result.Data!;
@@ -69,12 +67,8 @@ namespace Tgs.Payment.LeePay.MessageQueue
 					null,
 					null,
 					null,
-					result.ClientCode,
 					result.Message,
-					result.TraceId,
-					result.DisplayMessage,
-					result.Timestamp,
-					result.Path);
+					result.OriginalResponse);
 
 				var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
 

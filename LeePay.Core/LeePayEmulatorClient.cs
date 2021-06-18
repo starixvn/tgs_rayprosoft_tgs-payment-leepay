@@ -32,32 +32,37 @@ namespace Tgs.Payment.LeePay
 				}
 			});
 
-		public ValueTask<LeePayResponse<WithdrawResult>> WidthdrawAsync(string systemId, string systemKey, WithdrawOrder order)
-			=> ValueTask.FromResult(new LeePayResponse<WithdrawResult>
-			{
-				Code = "00",
-				Data = new WithdrawResult
-				{
-					OrderId = Guid.NewGuid(),
-					OrderNo = "WG-050717-3EaSnG-A",
-					CustomOrderNo = order.CustomOrderNo,
-					UsdtAmount = order.Amount,
-					ChannelCurrency = order.ChannelCurrency,
-					ChannelRate = 1,
-					Channel = order.Channel ?? "ETHEREUM"
-				}
-			});
+		public ValueTask<LeePayResponse<DepositOrderDetailResult>> GetDepositOrderAsync(
+			string systemId,
+			string systemKey,
+			string orderNo,
+			string customOrderNo) => throw new NotImplementedException();
 
-		public ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(string systemId, string systemKey, QueryExchangeRateOrder order)
-			=> ValueTask.FromResult(new LeePayResponse<QueryExchangeRateResult>
-			{
-				Code = "00",
-				Data = new QueryExchangeRateResult
-				{
-					BuyPrice = 6.35M + decimal.Parse(new Random().NextDouble().ToString()),
-					SellPrice = 6.36M + decimal.Parse(new Random().NextDouble().ToString()),
-					BizTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:00.000K")
-				}
-			});
+		public ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(
+			string systemId,
+			string systemKey,
+			string fromCurrency,
+			string toCurrency)
+			=> _realClient.QueryExchangeRateAsync(
+				systemId,
+				systemKey,
+				fromCurrency,
+				toCurrency);
+
+		public ValueTask<LeePayResponse<WithdrawResult>> WidthdrawAsync(string systemId, string systemKey, WithdrawOrder order)
+					=> ValueTask.FromResult(new LeePayResponse<WithdrawResult>
+					{
+						Code = "00",
+						Data = new WithdrawResult
+						{
+							OrderId = Guid.NewGuid(),
+							OrderNo = "WG-050717-3EaSnG-A",
+							CustomOrderNo = order.CustomOrderNo,
+							UsdtAmount = order.Amount,
+							ChannelCurrency = order.ChannelCurrency,
+							ChannelRate = 1,
+							Channel = order.Channel ?? "ETHEREUM"
+						}
+					});
 	}
 }

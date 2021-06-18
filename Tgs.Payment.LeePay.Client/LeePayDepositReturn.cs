@@ -15,5 +15,8 @@ namespace Tgs.Payment.LeePay
 		string TransactionHash,
 		DateTimeOffset CreatedAt,
 		string Channel,
-		string ActualAmount);
+		string ActualAmount,
+		decimal ChannelAmount,
+		string ChannelCurrency,
+		decimal ChannelCurrencyRate);
 }

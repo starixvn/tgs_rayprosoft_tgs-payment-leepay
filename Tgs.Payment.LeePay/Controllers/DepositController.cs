@@ -29,6 +29,7 @@ namespace Tgs.Payment.LeePay.Controllers
 			[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
 			[FromServices] ICommandService<SaveDepositReturnCommand> saveReturnService,
 			[FromServices] ICommandService<ApproveDepositFormCommand> approveService,
+			[FromServices] IGetService<GetLeePayDepositOrderQuery, DepositOrderDetailResult> getLeePayDepositOrderService,
 			[FromBody] Dictionary<string, object> response)
 		{
 			var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
@@ -60,20 +61,32 @@ namespace Tgs.Payment.LeePay.Controllers
 			{
 				if (depositForm.Status < 1000)
 				{
+					var orderResult = await getLeePayDepositOrderService
+						.GetAsync(
+							new GetLeePayDepositOrderQuery(
+								depositForm.ApplyInfo!.Settings.SystemId,
+								depositForm.ApplyInfo!.Settings.SystemKey,
+								depositResponse.OrderNo,
+								depositResponse.CustomOrderNo))
+						.ConfigureAwait(false);
+
 					var returnData = new LeePayDepositReturn(
-					depositResponse.CustomOrderNo,
-					depositResponse.NotifyCustomMessage,
-					depositResponse.OrderNo,
-					depositResponse.Uid,
-					depositResponse.Status,
-					depositResponse.OrderAmount,
-					depositResponse.FeeRate,
-					depositResponse.Fee,
-					depositResponse.ToAddress,
-					depositResponse.TransactionHash,
-					depositResponse.CreatedAt,
-					depositResponse.Channel,
-					depositResponse.ActualAmount);
+						depositResponse.CustomOrderNo,
+						depositResponse.NotifyCustomMessage,
+						depositResponse.OrderNo,
+						depositResponse.Uid,
+						depositResponse.Status,
+						depositResponse.OrderAmount,
+						orderResult.FeeRate,
+						orderResult.Fee,
+						depositResponse.ToAddress,
+						depositResponse.TransactionHash,
+						depositResponse.CreatedAt,
+						depositResponse.Channel,
+						depositResponse.ActualAmount,
+						orderResult.ChannelAmount,
+						orderResult.ChannelCurrency,
+						orderResult.ChannelCurrencyRate);
 					var saveReturnCommand = new SaveDepositReturnCommand(depositForm.Id, returnData);
 
 					await saveReturnService.ExecuteAsync(saveReturnCommand).ConfigureAwait(false);
@@ -145,6 +158,24 @@ namespace Tgs.Payment.LeePay.Controllers
 				checkSigningCodeService,
 				saveReturnService,
 				approveService,
+				new GetLeePayDepositOrderQueryEmulatorService(
+					new DepositOrderDetailResult
+					{
+						OrderNo = fakeViewModel.OrderNo,
+						CustomOrderNo = customOrderNo,
+						Uid = "test-wallet",
+						Status = "Success",
+						Fee = fakeViewModel.Fee,
+						FeeRate = fakeViewModel.FeeRate,
+						ToAddress = "fdafdasfdasfdsaf",
+						TransactionHash = "3bb8e040df2fd86bc7acc94d4fa37fbf8c675562d877bb3d698eceec25cca518", //DevSkim: ignore DS173237
+						ChannelAmount = fakeViewModel.OrderAmount,
+						ChannelCurrency = depositForm.ApplyInfo.Settings.ChannelCurrency,
+						Channel = fakeViewModel.Channel,
+						OrderAmount = fakeViewModel.OrderAmount,
+						ChannelCurrencyRate = 1M,
+						CreatedAt = DateTimeOffset.Now
+					}),
 				dict).ConfigureAwait(false);
 		}
 	}
