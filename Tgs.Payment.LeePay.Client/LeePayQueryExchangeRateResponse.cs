@@ -7,8 +7,5 @@
 		string? BizTime = null,
 		string? ClientCode = null,
 		string? Message = null,
-		string? TraceId = null,
-		string? DisplayMessage = null,
-		string? Timestamp = null,
-		string? Path = null);
+		string? ResponseContent = null);
 }

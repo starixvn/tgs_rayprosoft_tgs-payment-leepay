@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Mime;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -14,9 +11,9 @@ namespace Tgs.Payment.LeePay
 {
 	internal class LeePayClient : ILeePayClient
 	{
+		private readonly LeePayHasher _hasher;
 		private readonly HttpClient _httpClient;
 		private readonly JsonSerializerOptions? _jsonSerializerOptions;
-		private readonly LeePayHasher _hasher;
 		private readonly ILogger<LeePayClient> _logger;
 
 		public LeePayClient(
@@ -58,6 +55,79 @@ namespace Tgs.Payment.LeePay
 			return result!;
 		}
 
+		public async ValueTask<LeePayResponse<DepositOrderDetailResult>> GetDepositOrderAsync(
+			string systemId,
+			string systemKey,
+			string orderNo,
+			string customOrderNo)
+		{
+			var requestContent = new StringContent(SerializeObject(new
+			{
+				OrderNo = orderNo,
+				CustomOrderNo = customOrderNo
+			}));
+			requestContent.Headers.Add("SYSTEM_ID", systemId);
+			requestContent.Headers.Add("SYSTEM_KEY", systemKey);
+
+			requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
+
+			var response = await _httpClient
+				.PostAsync("/payment/txn/deposit", requestContent)
+				.ConfigureAwait(false);
+
+			_logger.LogInformation($"Get Deposit StatusCode: {response.StatusCode}");
+
+			var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+			_logger.LogInformation($"Get Deposit Body: {bodyJson}");
+
+			var result = JsonSerializer.Deserialize<LeePayResponse<DepositOrderDetailResult>>(bodyJson, _jsonSerializerOptions);
+
+			result!.OriginalResponse = bodyJson;
+
+			return result!;
+		}
+
+		public async ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(
+			string systemId,
+			string systemKey,
+			string fromCurrency,
+			string toCurrency)
+		{
+			var order = new QueryExchangeRateOrder
+			{
+				From = fromCurrency,
+				To = toCurrency
+			};
+
+			order.TranscationSigningCode = ComputeHash(
+				systemId,
+				systemKey,
+				order);
+
+			var requestContent = new StringContent(SerializeObject(order));
+			requestContent.Headers.Add("SYSTEM_ID", systemId);
+			requestContent.Headers.Add("SYSTEM_KEY", systemKey);
+
+			requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
+
+			var response = await _httpClient
+				.PostAsync("/rate/exchange", requestContent)
+				.ConfigureAwait(false);
+
+			_logger.LogInformation($"ExchangeRate StatusCode: {response.StatusCode}");
+
+			var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+			_logger.LogInformation($"ExchangeRate Body: {bodyJson}");
+
+			var result = JsonSerializer.Deserialize<LeePayResponse<QueryExchangeRateResult>>(bodyJson, _jsonSerializerOptions);
+
+			result!.OriginalResponse = bodyJson;
+
+			return result!;
+		}
+
 		public async ValueTask<LeePayResponse<WithdrawResult>> WidthdrawAsync(string systemId, string systemKey, WithdrawOrder order)
 		{
 			order.TranscationSigningCode = ComputeHash(systemId, systemKey, order);
@@ -85,9 +155,6 @@ namespace Tgs.Payment.LeePay
 			return result!;
 		}
 
-		private string SerializeObject<TOrder>(TOrder order)
-			=> JsonSerializer.Serialize(order, _jsonSerializerOptions);
-
 		private string ComputeHash<TOrder>(string systemId, string systemKey, TOrder order)
 		{
 			var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(SerializeObject(order))!;
@@ -95,50 +162,7 @@ namespace Tgs.Payment.LeePay
 			return _hasher.ComputeHash(systemId, systemKey, dict);
 		}
 
-		private string ComputeHashExchangeRate(string systemId, string systemKey, QueryExchangeRateOrder order)
-		{
-			var from = order.From;
-			var to = order.To;
-			var parmStr = $"from={from}&to={to}";
-			var fullText = $"SYSTEM_ID={systemId}&{parmStr}&SYSTEM_KEY={systemKey}";
-			var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
-			var hash = string.Join(
-				string.Empty,
-				SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
-			return hash;
-		}
-
-		public async ValueTask<LeePayResponse<QueryExchangeRateResult>> QueryExchangeRateAsync(string systemId, string systemKey, QueryExchangeRateOrder order)
-		{
-			order.TranscationSigningCode = ComputeHash(
-				systemId,
-				systemKey,
-				new Dictionary<string, string>(){
-					{ "from", order.From },
-					{ "to", order.To }
-				});
-
-			var requestContent = new StringContent(SerializeObject(order));
-			requestContent.Headers.Add("SYSTEM_ID", systemId);
-			requestContent.Headers.Add("SYSTEM_KEY", systemKey);
-
-			requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
-
-			var response = await _httpClient
-				.PostAsync("/rate/exchange", requestContent)
-				.ConfigureAwait(false);
-
-			_logger.LogInformation($"ExchangeRate StatusCode: {response.StatusCode}");
-
-			var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-			_logger.LogInformation($"ExchangeRate Body: {bodyJson}");
-
-			var result = JsonSerializer.Deserialize<LeePayResponse<QueryExchangeRateResult>>(bodyJson, _jsonSerializerOptions);
-
-			result!.OriginalResponse = bodyJson;
-
-			return result!;
-		}
+		private string SerializeObject<TOrder>(TOrder order)
+			=> JsonSerializer.Serialize(order, _jsonSerializerOptions);
 	}
 }
