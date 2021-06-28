@@ -19,7 +19,6 @@ namespace LeePayTest
 					});
 					services.AddPaymentClient();
 					services
-						.AddSystemJsonSerializer()
 						.AddSingleton<LeePaySerializer>();
 					services.AddHostedService<Demo>();
 				});
