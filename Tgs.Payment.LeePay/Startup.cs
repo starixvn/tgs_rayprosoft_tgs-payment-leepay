@@ -45,7 +45,6 @@ namespace Tgs.Payment.LeePay
 
 					config.GetSection("LeePay").Bind(options);
 				})
-				.AddSystemJsonSerializer()
 				.AddSingleton<LeePaySerializer>();
 
 			services
