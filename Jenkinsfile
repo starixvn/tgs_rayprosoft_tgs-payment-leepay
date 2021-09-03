@@ -36,7 +36,7 @@ pipeline {
                             def envItems = readProperties file: "$tgsconfig";
                             envItems.each { key, value -> env."tgs_${key}" = value;
                         }
-                        env.TAG = env.kube_ns + '-' + sh(script: "echo `date +%Y%m%d%H%M`", returnStdout: true).trim();
+                        env.TAG = sh(script: "echo `date +%Y%m%d%H%M`", returnStdout: true).trim() + '-' + env.kube_ns;
                         message += "\nBranch: ${env.GIT_BRANCH}" 
                         message += "\nTag: ${env.TAG}"
                         message += "\nEnv: ${env.kube_ns}"
@@ -69,13 +69,13 @@ pipeline {
 
 		stage('Build Docker Image') {
 			steps {
-				sh 'dotnet build "Tgs.Payment.LeePay/Tgs.Payment.LeePay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}-${kube_ns}" --no-restore '
+				sh 'dotnet build "Tgs.Payment.LeePay/Tgs.Payment.LeePay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
 			}
 		}
 
 		stage('Push Docker Image') {
 			steps {
-				sh 'sudo docker push $ImageName:${TAG}-${kube_ns}'
+				sh 'sudo docker push $ImageName:${TAG}'
 			}
 		}
 
@@ -100,7 +100,7 @@ pipeline {
 				withKubeConfig([credentialsId: env.k8s_config]) {
 					sh '''
 						helm template deployment/k8s/leepay \
-							--set image.tag=${TGS}-${kube_ns} \
+							--set image.tag=${TGS} \
 							--set namespace=${kube_ns} \
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
@@ -109,7 +109,7 @@ pipeline {
 					'''
 					sh '''
 						helm template deployment/k8s/leepay \
-							--set image.tag=${TGS}-${kube_ns} \
+							--set image.tag=${TGS} \
 							--set namespace=${kube_ns} \
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
