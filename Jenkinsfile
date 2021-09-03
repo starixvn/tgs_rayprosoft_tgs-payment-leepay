@@ -108,7 +108,7 @@ pipeline {
 							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay"
 					'''
 					sh '''
-						helm template k8s/leepay \
+						helm template deployment/k8s/leepay \
 							--set image.tag=${TGS}-${kube_ns} \
 							--set namespace=${kube_ns} \
 							--set connectionStrings.tgs="$tgs_tgs" \
