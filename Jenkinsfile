@@ -100,7 +100,7 @@ pipeline {
 				withKubeConfig([credentialsId: env.k8s_config]) {
 					sh '''
 						helm template deployment/k8s/leepay \
-							--set image.tag=${TGS} \
+							--set image.tag=${TAG} \
 							--set namespace=${kube_ns} \
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
@@ -109,7 +109,7 @@ pipeline {
 					'''
 					sh '''
 						helm template deployment/k8s/leepay \
-							--set image.tag=${TGS} \
+							--set image.tag=${TAG} \
 							--set namespace=${kube_ns} \
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
