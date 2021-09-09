@@ -26,7 +26,9 @@ namespace Tgs.Payment.LeePay.Repositories
 				data.BrandPaymentId,
 				data.Amount,
 				data.Status,
-				_serializer.Deserialize<LeePayDepositApplyInfo>(data.ApplyInfo),
+				data.ApplyInfo == null
+					? null
+					: _serializer.Deserialize<LeePayDepositApplyInfo>(data.ApplyInfo),
 				data.PaymentReturn);
 		}
 

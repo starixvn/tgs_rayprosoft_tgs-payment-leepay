@@ -31,7 +31,7 @@ namespace Tgs.Payment.LeePay.MessageQueue
 		public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
 		{
 			var request = WithdrawRequest.Parser.ParseFrom(data);
-			var settings = _leePaySerializer.Deserialize<LeePayWithdrawSettings>(request.ApplyInfo);
+			var settings = _leePaySerializer.Deserialize<LeePayWithdrawSettings>(request.ApplyInfo)!;
 
 			var order = new WithdrawOrder
 			{
