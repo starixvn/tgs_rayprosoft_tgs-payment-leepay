@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.LeePay.MessageQueue;
@@ -22,6 +24,21 @@ namespace Microsoft.Extensions.DependencyInjection
 					httpClient.BaseAddress = options.PaymentApiUrl;
 				})
 				.Services
+				.AddPaymentServiceClient((options, sp) =>
+				{
+					var leePayOptions = sp.GetRequiredService<IOptions<LeePayOptions>>().Value;
+
+					options.PaymentServiceBaseUrl = leePayOptions.PaymentServiceBaseUrl;
+
+					options.JsonSerializerOptions = new JsonSerializerOptions
+					{
+						PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+						Converters =
+						{
+							new JsonStringEnumConverter()
+						}
+					};
+				})
 				.AddTransient<ILeePayClient>(sp =>
 				{
 					var options = sp.GetRequiredService<IOptions<LeePayOptions>>().Value;

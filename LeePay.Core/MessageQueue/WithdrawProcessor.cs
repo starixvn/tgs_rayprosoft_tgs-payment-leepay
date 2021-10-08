@@ -14,9 +14,9 @@ namespace Tgs.Payment.LeePay.MessageQueue
 	{
 		private readonly LeePaySerializer _leePaySerializer;
 		private readonly ILogger<WithdrawProcessor> _logger;
-		private readonly IPaymentClient _paymentClient;
 		private readonly LeePayOptions _options;
 		private readonly ILeePayClient _payClient;
+		private readonly IPaymentClient _paymentClient;
 
 		public WithdrawProcessor(
 			IOptions<LeePayOptions> optionsAccessor,
@@ -68,7 +68,7 @@ namespace Tgs.Payment.LeePay.MessageQueue
 				var applyInfo = new LeePayWithdrawApplyInfo(settings, response);
 
 				await _paymentClient
-					.EmitWithdrawFormThirdPartyOrderNoAsync(settings.CustomOrderNo, orderResult.OrderNo)
+					.SaveWithdrawFormThirdPartyOrderNoAsync(settings.CustomOrderNo, orderResult.OrderNo)
 					.ConfigureAwait(false);
 
 				var msg = new WithdrawResponse

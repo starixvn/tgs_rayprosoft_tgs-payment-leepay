@@ -64,7 +64,7 @@ pipeline {
 		stage('Push packages') {
 			steps {
 				sh 'dotnet pack -c $BuildConfiguration "Tgs.Payment.LeePay.Client/Tgs.Payment.LeePay.Client.csproj" --no-build'
-				sh 'dotnet nuget push "Tgs.Payment.LeePay.Client/bin/$BuildConfiguration/*.nupkg" --source "raypro" --skip-duplicate'
+				sh 'dotnet nuget push "Tgs.Payment.LeePay.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k admin --skip-duplicate'
 			}
 		}
 
@@ -76,7 +76,7 @@ pipeline {
 
 		stage('Push Docker Image') {
 			steps {
-				sh 'sudo docker push $ImageName:${TAG}'
+				sh 'docker push $ImageName:${TAG}'
 			}
 		}
 
@@ -103,19 +103,20 @@ pipeline {
 						helm template deployment/k8s/leepay \
 							--set image.tag=${TAG} \
 							--set namespace=${kube_ns} \
-							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay"
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
+                            --set simulation="$tgs_simulation_leepay"
 					'''
 					sh '''
 						helm template deployment/k8s/leepay \
 							--set image.tag=${TAG} \
 							--set namespace=${kube_ns} \
-							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" | kubectl -n ${kube_ns} apply -f -
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
+                            --set simulation="$tgs_simulation_leepay" \
+                            | kubectl -n ${kube_ns} apply -f -
 					'''
 				}
 			}

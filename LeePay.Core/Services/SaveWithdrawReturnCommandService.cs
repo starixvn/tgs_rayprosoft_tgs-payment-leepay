@@ -1,20 +1,27 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace Tgs.Payment.LeePay.Services
 {
 	internal class SaveWithdrawReturnCommandService : ICommandService<SaveWithdrawReturnCommand>
 	{
-		private readonly ITgsRepository _tgsRepository;
+		private readonly LeePaySerializer _leePaySerializer;
+		private readonly IPaymentServiceClient _paymentServiceClient;
 
-		public SaveWithdrawReturnCommandService(ITgsRepository tgsRepository)
+		public SaveWithdrawReturnCommandService(IPaymentServiceClient paymentServiceClient, LeePaySerializer leePaySerializer)
 		{
-			_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+			_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
 		}
 
 		public ValueTask ExecuteAsync(SaveWithdrawReturnCommand command, CancellationToken cancellationToken = default)
-			=> _tgsRepository.SaveWithdrawReturnAsync(command.FormId, command.ReturnData);
+			=> _paymentServiceClient.SubmitWithdrawFormStatusAsync(
+				command.FormId,
+				command.State,
+				_leePaySerializer.Serialize(command.ReturnData),
+				null);
 	}
 }
