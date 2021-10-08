@@ -1,4 +1,5 @@
 ﻿using System;
+using Tgs.Payment.Clients;
 
 namespace Tgs.Payment.LeePay
 {
@@ -8,7 +9,7 @@ namespace Tgs.Payment.LeePay
 		Guid BrandId,
 		Guid BrandPaymentId,
 		decimal Amount,
-		int Status,
+		PaymentFlowState Status,
 		LeePayDepositApplyInfo? ApplyInfo,
 		string? PaymentReturn = null);
 }

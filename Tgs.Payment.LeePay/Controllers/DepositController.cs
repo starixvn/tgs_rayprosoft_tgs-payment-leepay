@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay.Services;
 using Tgs.Payment.LeePay.ViewModels;
 using TGS.ServiceUtility;
@@ -59,7 +60,7 @@ namespace Tgs.Payment.LeePay.Controllers
 
 			if (await checkSigningCodeCommand.CommandResultSource.Task.ConfigureAwait(false))
 			{
-				if (depositForm.Status < 1000)
+				if (depositForm.Status < PaymentFlowState.WaitApprove)
 				{
 					var orderResult = await getLeePayDepositOrderService
 						.GetAsync(
@@ -87,7 +88,11 @@ namespace Tgs.Payment.LeePay.Controllers
 						orderResult.ChannelAmount,
 						orderResult.ChannelCurrency,
 						orderResult.ChannelCurrencyRate);
-					var saveReturnCommand = new SaveDepositReturnCommand(depositForm.Id, returnData);
+
+					var saveReturnCommand = new SaveDepositReturnCommand(
+						depositForm.Id,
+						depositForm.Status,
+						returnData);
 
 					await saveReturnService.ExecuteAsync(saveReturnCommand).ConfigureAwait(false);
 
