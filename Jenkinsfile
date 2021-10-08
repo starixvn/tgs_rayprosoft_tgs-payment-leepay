@@ -105,7 +105,8 @@ pipeline {
 							--set namespace=${kube_ns} \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay"
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
+                            --set simulation="$tgs_simulation_leepay"
 					'''
 					sh '''
 						helm template deployment/k8s/leepay \
@@ -113,7 +114,9 @@ pipeline {
 							--set namespace=${kube_ns} \
 							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" | kubectl -n ${kube_ns} apply -f -
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
+                            --set simulation="$tgs_simulation_leepay" \
+                            | kubectl -n ${kube_ns} apply -f -
 					'''
 				}
 			}
