@@ -99,25 +99,27 @@ pipeline {
 		stage('Deploy to k8s') {
 			steps {
 				withKubeConfig([credentialsId: env.k8s_config]) {
-					sh '''
-						helm template deployment/k8s/leepay \
-							--set image.tag=${TAG} \
-							--set namespace=${kube_ns} \
-							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
-							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
-                            --set simulation="$tgs_simulation_leepay"
-					'''
-					sh '''
-						helm template deployment/k8s/leepay \
-							--set image.tag=${TAG} \
-							--set namespace=${kube_ns} \
-							--set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
-							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
-                            --set simulation="$tgs_simulation_leepay" \
-                            | kubectl -n ${kube_ns} apply -f -
-					'''
+                    withCredentials([string(credentialsId: "tgs-${kube_ns}-connectionstring", variable: "tgs_tgs")]) {
+                        sh '''
+                            helm template deployment/k8s/leepay \
+                                --set image.tag=${TAG} \
+                                --set namespace=${kube_ns} \
+                                --set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
+                                --set nats="$tgs_nats" \
+                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
+                                --set simulation="$tgs_simulation_leepay"
+                        '''
+                        sh '''
+                            helm template deployment/k8s/leepay \
+                                --set image.tag=${TAG} \
+                                --set namespace=${kube_ns} \
+                                --set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
+                                --set nats="$tgs_nats" \
+                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
+                                --set simulation="$tgs_simulation_leepay" \
+                                | kubectl -n ${kube_ns} apply -f -
+                        '''
+                    }
 				}
 			}
 		}
