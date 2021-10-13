@@ -70,10 +70,15 @@ namespace Tgs.Payment.LeePay.Controllers
 					withdrawResponse.ToAddress,
 					withdrawResponse.TransactionHash);
 
+				var formStatus = withdrawForm.Status;
+				if (withdrawForm.Status == Clients.PaymentFlowState.Approved)
+					formStatus = Clients.PaymentFlowState.Paid;
+
 				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
 					withdrawForm.Id,
-					withdrawForm.Status,
-					returnData);
+					formStatus,
+					returnData,
+					withdrawResponse.OrderAmount);
 
 				await saveReturnService.ExecuteAsync(saveWithdrawCommand).ConfigureAwait(false);
 

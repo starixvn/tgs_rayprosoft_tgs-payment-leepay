@@ -98,7 +98,7 @@ namespace Tgs.Payment.LeePay.Controllers
 
 					if (depositResponse.Status == "MappingSuccess")
 					{
-						var approveCommand = new ApproveDepositFormCommand(depositForm.Id, depositForm.BrandId);
+						var approveCommand = new ApproveDepositFormCommand(depositForm.Id, depositForm.BrandId, null);
 
 						await approveService.ExecuteAsync(approveCommand).ConfigureAwait(false);
 					}
