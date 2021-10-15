@@ -18,11 +18,9 @@ namespace Tgs.Payment.LeePay.Services
 		}
 
 		public ValueTask ExecuteAsync(SaveDepositReturnCommand command, CancellationToken cancellationToken = default)
-			=> _paymentServiceClient
-				.SubmitDepositFormStatusAsync(
-					command.FormId,
-					command.State,
-					_leePaySerializer.Serialize(command.ReturnData),
-					thirdPartyOrderNo: command.ThirdPartyOrderNo);
+			=> _paymentServiceClient.SubmitDepositFormStatusAsync(
+				command.FormId,
+				command.State,
+				_leePaySerializer.Serialize(command.ReturnData));
 	}
 }
