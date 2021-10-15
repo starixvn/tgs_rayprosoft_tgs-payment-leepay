@@ -99,7 +99,6 @@ pipeline {
 		stage('Deploy to k8s') {
 			steps {
 				withKubeConfig([credentialsId: env.k8s_config]) {
-                    withCredentials([string(credentialsId: "tgs-${kube_ns}-connectionstring", variable: "tgs_tgs")]) {
                         sh '''
                             helm template deployment/k8s/leepay \
                                 --set image.tag=${TAG} \
@@ -119,7 +118,6 @@ pipeline {
                                 --set simulation="$tgs_simulation_leepay" \
                                 | kubectl -n ${kube_ns} apply -f -
                         '''
-                    }
 				}
 			}
 		}
