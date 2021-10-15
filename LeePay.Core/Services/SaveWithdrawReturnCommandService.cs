@@ -22,6 +22,7 @@ namespace Tgs.Payment.LeePay.Services
 				command.FormId,
 				command.State,
 				_leePaySerializer.Serialize(command.ReturnData),
-				command.ActualAmount);
+				command.ActualAmount,
+				command.ThirdPartyOrderNo);
 	}
 }
