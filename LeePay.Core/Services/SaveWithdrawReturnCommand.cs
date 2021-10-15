@@ -7,6 +7,5 @@ namespace Tgs.Payment.LeePay.Services
 		Guid FormId,
 		PaymentFlowState State,
 		LeePayWithdrawReturn ReturnData,
-		decimal? ActualAmount,
-		string? ThirdPartyOrderNo);
+		decimal? ActualAmount);
 }

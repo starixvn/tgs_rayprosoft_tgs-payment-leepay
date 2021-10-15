@@ -92,8 +92,7 @@ namespace Tgs.Payment.LeePay.Controllers
 					var saveReturnCommand = new SaveDepositReturnCommand(
 						depositForm.Id,
 						depositForm.Status,
-						returnData,
-						depositResponse.OrderNo);
+						returnData);
 
 					await saveReturnService.ExecuteAsync(saveReturnCommand).ConfigureAwait(false);
 
