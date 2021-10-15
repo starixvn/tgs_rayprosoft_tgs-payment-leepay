@@ -22,6 +22,7 @@ namespace Tgs.Payment.LeePay.Services
 				.SubmitDepositFormStatusAsync(
 					command.FormId,
 					command.State,
-					_leePaySerializer.Serialize(command.ReturnData));
+					_leePaySerializer.Serialize(command.ReturnData),
+					thirdPartyOrderNo: command.ThirdPartyOrderNo);
 	}
 }

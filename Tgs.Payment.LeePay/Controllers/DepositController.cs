@@ -92,13 +92,17 @@ namespace Tgs.Payment.LeePay.Controllers
 					var saveReturnCommand = new SaveDepositReturnCommand(
 						depositForm.Id,
 						depositForm.Status,
-						returnData);
+						returnData,
+						depositResponse.OrderNo);
 
 					await saveReturnService.ExecuteAsync(saveReturnCommand).ConfigureAwait(false);
 
 					if (depositResponse.Status == "MappingSuccess")
 					{
-						var approveCommand = new ApproveDepositFormCommand(depositForm.Id, depositForm.BrandId, null);
+						var approveCommand = new ApproveDepositFormCommand(
+							depositForm.Id,
+							depositForm.BrandId,
+							null);
 
 						await approveService.ExecuteAsync(approveCommand).ConfigureAwait(false);
 					}
