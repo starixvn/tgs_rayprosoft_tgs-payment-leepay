@@ -71,17 +71,34 @@ namespace Tgs.Payment.LeePay.Controllers
 					withdrawResponse.ToAddress,
 					withdrawResponse.TransactionHash);
 
-				var formStatus = withdrawForm.Status;
-				if (withdrawForm.Status == PaymentFlowState.Approved)
-					formStatus = PaymentFlowState.Paid;
+				if (withdrawResponse.Status == "Success")
+				{
+					var formStatus = withdrawForm.Status;
+					if (withdrawForm.Status == PaymentFlowState.Approved)
+						formStatus = PaymentFlowState.Paid;
 
-				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
-					withdrawForm.Id,
-					formStatus,
-					returnData,
-					withdrawResponse.OrderAmount);
+					var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+						withdrawForm.Id,
+						formStatus,
+						returnData,
+						withdrawResponse.OrderAmount);
 
-				await saveReturnService.ExecuteAsync(saveWithdrawCommand).ConfigureAwait(false);
+					await saveReturnService
+						.ExecuteAsync(saveWithdrawCommand)
+						.ConfigureAwait(false);
+				}
+				else
+				{
+					var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+						withdrawForm.Id,
+						withdrawForm.Status,
+						returnData,
+						null);
+
+					await saveReturnService
+						.ExecuteAsync(saveWithdrawCommand)
+						.ConfigureAwait(false);
+				}
 
 				return new WithdrawConfirmViewModel
 				{
