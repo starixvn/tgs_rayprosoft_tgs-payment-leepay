@@ -74,8 +74,8 @@ namespace Tgs.Payment.LeePay.Controllers
 				if (withdrawResponse.Status == "Success")
 				{
 					var formStatus = withdrawForm.Status;
-					if (withdrawForm.Status == Clients.PaymentFlowState.Approved)
-						formStatus = Clients.PaymentFlowState.Paid;
+					if (withdrawForm.Status == PaymentFlowState.Approved)
+						formStatus = PaymentFlowState.Paid;
 
 					var saveWithdrawCommand = new SaveWithdrawReturnCommand(
 						withdrawForm.Id,
