@@ -5,6 +5,7 @@ using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
+using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 
 namespace Tgs.Payment.LeePay.MessageQueue
@@ -13,6 +14,7 @@ namespace Tgs.Payment.LeePay.MessageQueue
 	{
 		private readonly LeePaySerializer _leePaySerializer;
 		private readonly ILogger<WithdrawProcessor> _logger;
+		private readonly IPaymentClient _paymentClient;
 		private readonly LeePayOptions _options;
 		private readonly ILeePayClient _payClient;
 
@@ -20,18 +22,20 @@ namespace Tgs.Payment.LeePay.MessageQueue
 			IOptions<LeePayOptions> optionsAccessor,
 			ILeePayClient payClient,
 			LeePaySerializer leePaySerializer,
-			ILogger<WithdrawProcessor> logger)
+			ILogger<WithdrawProcessor> logger,
+			IPaymentClient paymentClient)
 		{
 			_options = optionsAccessor.Value;
 			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
 			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			_paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
 		}
 
 		public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
 		{
 			var request = WithdrawRequest.Parser.ParseFrom(data);
-			var settings = _leePaySerializer.Deserialize<LeePayWithdrawSettings>(request.ApplyInfo);
+			var settings = _leePaySerializer.Deserialize<LeePayWithdrawSettings>(request.ApplyInfo)!;
 
 			var order = new WithdrawOrder
 			{
@@ -62,6 +66,10 @@ namespace Tgs.Payment.LeePay.MessageQueue
 					orderResult.Channel);
 
 				var applyInfo = new LeePayWithdrawApplyInfo(settings, response);
+
+				await _paymentClient
+					.EmitWithdrawFormThirdPartyOrderNoAsync(settings.CustomOrderNo, orderResult.OrderNo)
+					.ConfigureAwait(false);
 
 				var msg = new WithdrawResponse
 				{

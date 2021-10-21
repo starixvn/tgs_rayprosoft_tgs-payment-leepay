@@ -31,7 +31,7 @@ namespace Tgs.Payment.LeePay.MessageQueue
 		public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
 		{
 			var request = GeneralRequest.Parser.ParseFrom(data);
-			var settings = _leePaySerializer.Deserialize<LeePayQueryExchangeRateSettings>(request.Content);
+			var settings = _leePaySerializer.Deserialize<LeePayQueryExchangeRateSettings>(request.Content)!;
 
 			var result = await _payClient
 				.QueryExchangeRateAsync(
