@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay.Services;
 using Tgs.Payment.LeePay.ViewModels;
 using TGS.ServiceUtility;
@@ -69,9 +70,35 @@ namespace Tgs.Payment.LeePay.Controllers
 					withdrawResponse.Status,
 					withdrawResponse.ToAddress,
 					withdrawResponse.TransactionHash);
-				var saveWithdrawCommand = new SaveWithdrawReturnCommand(withdrawForm.Id, returnData);
 
-				await saveReturnService.ExecuteAsync(saveWithdrawCommand).ConfigureAwait(false);
+				if (withdrawResponse.Status == "Success")
+				{
+					var formStatus = withdrawForm.Status;
+					if (withdrawForm.Status == PaymentFlowState.Approved)
+						formStatus = PaymentFlowState.Paid;
+
+					var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+						withdrawForm.Id,
+						formStatus,
+						returnData,
+						withdrawResponse.OrderAmount);
+
+					await saveReturnService
+						.ExecuteAsync(saveWithdrawCommand)
+						.ConfigureAwait(false);
+				}
+				else
+				{
+					var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+						withdrawForm.Id,
+						withdrawForm.Status,
+						returnData,
+						null);
+
+					await saveReturnService
+						.ExecuteAsync(saveWithdrawCommand)
+						.ConfigureAwait(false);
+				}
 
 				return new WithdrawConfirmViewModel
 				{
