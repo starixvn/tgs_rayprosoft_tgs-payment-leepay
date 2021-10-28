@@ -10,18 +10,16 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-namaespace: dev
+namespace: dev
 
 nameOverride: "payment-leepay"
 fullnameOverride: "payment-leepay"
-
-connectionStrings:
-  tgs: Server=localhost;Database=tgs;User Id=tgs;Password=1qaz2wsx!@
 
 nats: nats://localhost:4222
 
 paymentApiUrl: https://api.leepay-wallet.com
 callbackBaseUrl: https://payment.yggdrasill.dev
+paymentServiceBaseUrl: http://payment-api
 
 simulation: true
 
@@ -30,10 +28,12 @@ imagePullSecrets:
 
 podAnnotations: {}
 
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -56,6 +56,13 @@ resources:
   requests:
     cpu: 200m
     memory: 400Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 

@@ -11,5 +11,7 @@ namespace Tgs.Payment.LeePay
 		public string NatsUrl { get; set; } = default!;
 
 		public Uri PaymentApiUrl { get; set; } = default!;
+
+		public Uri PaymentServiceBaseUrl { get; set; } = default!;
 	}
 }

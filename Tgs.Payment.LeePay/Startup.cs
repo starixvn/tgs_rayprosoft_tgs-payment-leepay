@@ -2,9 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,10 +25,7 @@ namespace Tgs.Payment.LeePay
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
-				endpoints.MapGet("/", async context =>
-				{
-					await context.Response.WriteAsync("Hello World!");
-				});
+				endpoints.MapHealthChecks("/healthz");
 			});
 		}
 
@@ -48,15 +43,6 @@ namespace Tgs.Payment.LeePay
 				.AddSingleton<LeePaySerializer>();
 
 			services
-				.AddLeePayRepositories((sp, builder) =>
-				{
-					var config = sp.GetRequiredService<IConfiguration>();
-
-					builder
-						.UseNpgsql(config.GetConnectionString("Tgs"));
-				});
-
-			services
 				.AddControllers()
 				.AddJsonOptions(options =>
 				{
@@ -71,6 +57,8 @@ namespace Tgs.Payment.LeePay
 
 				return options;
 			});
+
+			services.AddHealthChecks();
 		}
 	}
 }
