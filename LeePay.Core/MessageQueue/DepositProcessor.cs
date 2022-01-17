@@ -7,89 +7,85 @@ using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
 
-namespace Tgs.Payment.LeePay.MessageQueue
+namespace Tgs.Payment.LeePay.MessageQueue;
+
+internal class DepositProcessor : IMessageProcessor
 {
-	internal class DepositProcessor : IMessageProcessor
+	private readonly LeePaySerializer _leePaySerializer;
+	private readonly LeePayOptions _options;
+	private readonly ILeePayClient _payClient;
+
+	public DepositProcessor(
+		IOptions<LeePayOptions> optionsAccessor,
+		ILeePayClient payClient,
+		LeePaySerializer leePaySerializer)
 	{
-		private readonly LeePaySerializer _leePaySerializer;
-		private readonly ILogger<DepositProcessor> _logger;
-		private readonly LeePayOptions _options;
-		private readonly ILeePayClient _payClient;
+		_options = optionsAccessor.Value;
+		_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
+		_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
+	}
 
-		public DepositProcessor(
-			IOptions<LeePayOptions> optionsAccessor,
-			ILeePayClient payClient,
-			LeePaySerializer leePaySerializer,
-			ILogger<DepositProcessor> logger)
+	public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+	{
+		var request = DepositRequest.Parser.ParseFrom(data);
+		var settings = _leePaySerializer.Deserialize<LeePayDepositSettings>(request.ApplyInfo)!;
+
+		var order = new DepositOrder
 		{
-			_options = optionsAccessor.Value;
-			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
-			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		}
+			CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
+			Amount = decimal.Parse(request.Amount),
+			NotifyUrl = $"{_options.CallbackBaseUrl}/deposit/callback",
+			ReturnUrl = settings.ReturnUrl,
+			DepositLimitTime = 60,
+			ChannelCurrency = settings.ChannelCurrency,
+			Channel = string.IsNullOrEmpty(settings.Channel) ? null : settings.Channel
+		};
 
-		public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+		var result = await _payClient
+			.DepositAsync(settings.SystemId, settings.SystemKey, order)
+			.ConfigureAwait(false);
+
+		var orderResult = result.Data!;
+
+		if (result.Code == "00")
 		{
-			var request = DepositRequest.Parser.ParseFrom(data);
-			var settings = _leePaySerializer.Deserialize<LeePayDepositSettings>(request.ApplyInfo)!;
+			var response = new LeePayDepositResponse(
+				result.Code,
+				result.Message,
+				orderResult.OrderId,
+				orderResult.OrderNo,
+				new Guid(Convert.FromBase64String(orderResult.CustomOrderNo)),
+				orderResult.WalletAddress,
+				orderResult.PaymentUrl,
+				orderResult.UsdtAmount,
+				orderResult.ChannelCurrency,
+				orderResult.ChannelRate,
+				orderResult.Channel);
 
-			var order = new DepositOrder
+			var applyInfo = new LeePayDepositApplyInfo(settings, response);
+
+			var msg = new DepositResponse
 			{
-				CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
-				Amount = decimal.Parse(request.Amount),
-				NotifyUrl = $"{_options.CallbackBaseUrl}/deposit/callback",
-				ReturnUrl = settings.ReturnUrl,
-				DepositLimitTime = 60,
-				ChannelCurrency = settings.ChannelCurrency,
-				Channel = string.IsNullOrEmpty(settings.Channel) ? null : settings.Channel
+				Result = _leePaySerializer.Serialize(applyInfo)
 			};
 
-			var result = await _payClient
-				.DepositAsync(settings.SystemId, settings.SystemKey, order)
-				.ConfigureAwait(false);
+			return msg.ToByteArray();
+		}
+		else
+		{
+			var response = new LeePayDepositResponse(
+				result.Code,
+				result.Message,
+				ResponseContent: result.OriginalResponse);
 
-			var orderResult = result.Data!;
+			var applyInfo = new LeePayDepositApplyInfo(settings, response);
 
-			if (result.Code == "00")
+			var msg = new WithdrawResponse
 			{
-				var response = new LeePayDepositResponse(
-					result.Code,
-					result.Message,
-					orderResult.OrderId,
-					orderResult.OrderNo,
-					new Guid(Convert.FromBase64String(orderResult.CustomOrderNo)),
-					orderResult.WalletAddress,
-					orderResult.PaymentUrl,
-					orderResult.UsdtAmount,
-					orderResult.ChannelCurrency,
-					orderResult.ChannelRate,
-					orderResult.Channel);
+				Result = _leePaySerializer.Serialize(applyInfo)
+			};
 
-				var applyInfo = new LeePayDepositApplyInfo(settings, response);
-
-				var msg = new DepositResponse
-				{
-					Result = _leePaySerializer.Serialize(applyInfo)
-				};
-
-				return msg.ToByteArray();
-			}
-			else
-			{
-				var response = new LeePayDepositResponse(
-					result.Code,
-					result.Message,
-					ResponseContent: result.OriginalResponse);
-
-				var applyInfo = new LeePayDepositApplyInfo(settings, response);
-
-				var msg = new WithdrawResponse
-				{
-					Result = _leePaySerializer.Serialize(applyInfo)
-				};
-
-				return msg.ToByteArray();
-			}
+			return msg.ToByteArray();
 		}
 	}
 }

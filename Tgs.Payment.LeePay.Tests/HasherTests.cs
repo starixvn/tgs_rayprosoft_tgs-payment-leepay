@@ -5,62 +5,61 @@ using System.Security.Cryptography;
 using System.Text;
 using NUnit.Framework;
 
-namespace Tgs.Payment.LeePay.Tests
+namespace Tgs.Payment.LeePay.Tests;
+
+[TestFixture]
+public class HasherTests
 {
-	[TestFixture]
-	public class HasherTests
+	[Test]
+	public void DateTimeOffset_Hash_Should_Match_Format()
 	{
-		[Test]
-		public void DateTimeOffset_Hash_Should_Match_Format()
+		var sut = new LeePayHasher();
+
+		var systemId = "systemId";
+		var systemKey = "systemKey";
+
+		var dict = new Dictionary<string, object>
 		{
-			var sut = new LeePayHasher();
+			["date"] = DateTimeOffset.Parse("2021-05-07T06:39:14.530Z")
+		};
 
-			var systemId = "systemId";
-			var systemKey = "systemKey";
+		var expected = HashCode(systemId, systemKey, "date=2021-05-07T06:39:14.530Z");
 
-			var dict = new Dictionary<string, object>
-			{
-				["date"] = DateTimeOffset.Parse("2021-05-07T06:39:14.530Z")
-			};
+		var actual = sut.ComputeHash(systemId, systemKey, dict);
 
-			var expected = HashCode(systemId, systemKey, "date=2021-05-07T06:39:14.530Z");
+		Assert.AreEqual(expected, actual);
+	}
 
-			var actual = sut.ComputeHash(systemId, systemKey, dict);
+	[Test]
+	public void Null_Value_Should_Transfer_To_null_String()
+	{
+		var sut = new LeePayHasher();
 
-			Assert.AreEqual(expected, actual);
-		}
+		var systemId = "systemId";
+		var systemKey = "systemKey";
 
-		[Test]
-		public void Null_Value_Should_Transfer_To_null_String()
+		var dict = new Dictionary<string, object>
 		{
-			var sut = new LeePayHasher();
+			["data"] = null
+		};
 
-			var systemId = "systemId";
-			var systemKey = "systemKey";
+		var expected = HashCode(systemId, systemKey, "data=null");
 
-			var dict = new Dictionary<string, object>
-			{
-				["data"] = null
-			};
+		var actual = sut.ComputeHash(systemId, systemKey, dict);
 
-			var expected = HashCode(systemId, systemKey, "data=null");
+		Assert.AreEqual(expected, actual);
+	}
 
-			var actual = sut.ComputeHash(systemId, systemKey, dict);
+	private static string HashCode(string systemId, string systemKey, string content)
+	{
+		var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
 
-			Assert.AreEqual(expected, actual);
-		}
+		var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
 
-		private string HashCode(string systemId, string systemKey, string content)
-		{
-			var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
+		var hash = string.Join(
+			string.Empty,
+			SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
 
-			var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
-
-			var hash = string.Join(
-				string.Empty,
-				SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
-
-			return hash;
-		}
+		return hash;
 	}
 }

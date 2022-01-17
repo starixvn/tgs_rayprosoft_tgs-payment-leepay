@@ -1,34 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Tgs.Payment.LeePay
+namespace Tgs.Payment.LeePay;
+
+public class LeePayHasher
 {
-	public class LeePayHasher
+#pragma warning disable CA1822 // 將成員標記為靜態
+
+	public string ComputeHash(string systemId, string systemKey, IDictionary<string, object> dict)
+#pragma warning restore CA1822 // 將成員標記為靜態
 	{
-		public string ComputeHash(string systemId, string systemKey, IDictionary<string, object> dict)
-		{
-			var content = string.Join(
-				"&",
-				dict.OrderBy(p => p.Key).Select(p =>
-				{
-					if (p.Value is DateTimeOffset)
-						return $"{p.Key}={p.Value:yyyy-MM-ddTHH:mm:ss.fffZ}";
-					else
-						return $"{p.Key}={p.Value ?? "null"}";
-				}));
+		var content = string.Join(
+			"&",
+			dict.OrderBy(p => p.Key).Select(p =>
+			{
+				return p.Value is DateTimeOffset ? $"{p.Key}={p.Value:yyyy-MM-ddTHH:mm:ss.fffZ}" : $"{p.Key}={p.Value ?? "null"}";
+			}));
 
-			var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
+		var fullText = $"SYSTEM_ID={systemId}&{content}&SYSTEM_KEY={systemKey}";
 
-			var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
+		var base64Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(fullText));
 
-			var hash = string.Join(
-				string.Empty,
-				SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
+		var hash = string.Join(
+			string.Empty,
+			SHA256.HashData(Encoding.UTF8.GetBytes(base64Code)).Select(b => b.ToString("X2")));
 
-			return hash;
-		}
+		return hash;
 	}
 }

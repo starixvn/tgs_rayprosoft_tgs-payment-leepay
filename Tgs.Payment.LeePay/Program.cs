@@ -1,30 +1,47 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Tgs.Payment.LeePay;
 
-namespace Tgs.Payment.LeePay
-{
-	public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+	.AddJsonFile("/config/appsettings.json", true);
+
+builder.Logging
+	.AddTgsLog();
+
+builder.Services
+	.AddLeePay((options, sp) =>
 	{
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureAppConfiguration(builder =>
-				{
-					builder.AddJsonFile("/config/appsettings.json", true);
-				})
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.UseStartup<Startup>();
-				})
-				.ConfigureLogging((ctx, builder) =>
-				{
-					builder.AddTgsLog();
-				});
+		var config = sp.GetRequiredService<IConfiguration>();
 
-		public static void Main(string[] args)
-		{
-			CreateHostBuilder(args).Build().Run();
-		}
-	}
-}
+		config.GetSection("LeePay").Bind(options);
+	})
+	.AddSingleton<LeePaySerializer>();
+
+builder.Services
+	.AddControllers()
+	.AddJsonOptions(options =>
+	{
+		options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+		options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+		options.JsonSerializerOptions.Converters.Add(new LeePayDateTimeOffsetConverter());
+	});
+
+builder.Services.AddTransient(sp =>
+{
+	var options = sp.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions;
+
+	return options;
+});
+
+builder.Services.AddHealthChecks();
+
+var app = builder.Build();
+
+app.MapControllers();
+app.MapHealthChecks("/healthz");
+
+app.Run();

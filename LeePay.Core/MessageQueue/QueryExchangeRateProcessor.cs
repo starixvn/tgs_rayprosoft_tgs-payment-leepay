@@ -7,78 +7,71 @@ using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
 
-namespace Tgs.Payment.LeePay.MessageQueue
+namespace Tgs.Payment.LeePay.MessageQueue;
+
+internal class QueryExchangeRateProcessor : IMessageProcessor
 {
-	internal class QueryExchangeRateProcessor : IMessageProcessor
+	private readonly LeePaySerializer _leePaySerializer;
+	private readonly ILeePayClient _payClient;
+
+	public QueryExchangeRateProcessor(
+		ILeePayClient payClient,
+		LeePaySerializer leePaySerializer)
 	{
-		private readonly LeePaySerializer _leePaySerializer;
-		private readonly ILogger<QueryExchangeRateProcessor> _logger;
-		private readonly LeePayOptions _options;
-		private readonly ILeePayClient _payClient;
+		_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
+		_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
+	}
 
-		public QueryExchangeRateProcessor(
-			IOptions<LeePayOptions> optionsAccessor,
-			ILeePayClient payClient,
-			LeePaySerializer leePaySerializer,
-			ILogger<QueryExchangeRateProcessor> logger)
+	public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+	{
+		var request = GeneralRequest.Parser.ParseFrom(data);
+		var settings = _leePaySerializer.Deserialize<LeePayQueryExchangeRateSettings>(request.Content)!;
+
+		var result = await _payClient
+			.QueryExchangeRateAsync(
+				settings.SystemId,
+				settings.SystemKey,
+				settings.From,
+				settings.To)
+			.ConfigureAwait(false);
+
+		var orderResult = result.Data!;
+
+		if (result.Code == "00")
 		{
-			_options = optionsAccessor.Value;
-			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
-			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+			var response = new LeePayQueryExchangeRateResponse(
+				result.Code,
+				orderResult.BuyPrice,
+				orderResult.SellPrice,
+				orderResult.BizTime);
+
+			var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
+
+			var msg = new GeneralResponse
+			{
+				Result = _leePaySerializer.Serialize(applyInfo)
+			};
+
+			return msg.ToByteArray();
 		}
-
-		public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+		else
 		{
-			var request = GeneralRequest.Parser.ParseFrom(data);
-			var settings = _leePaySerializer.Deserialize<LeePayQueryExchangeRateSettings>(request.Content)!;
+			var response = new LeePayQueryExchangeRateResponse(
+				result.Code,
+				null,
+				null,
+				null,
+				result.Message,
+				result.OriginalResponse);
 
-			var result = await _payClient
-				.QueryExchangeRateAsync(
-					settings.SystemId,
-					settings.SystemKey,
-					settings.From,
-					settings.To)
-				.ConfigureAwait(false);
+			var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
 
-			var orderResult = result.Data!;
-
-			if (result.Code == "00")
+			var msg = new GeneralResponse
 			{
-				var response = new LeePayQueryExchangeRateResponse(
-					result.Code,
-					orderResult.BuyPrice,
-					orderResult.SellPrice,
-					orderResult.BizTime);
+				Result = _leePaySerializer.Serialize(applyInfo)
+			};
 
-				var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
-
-				var msg = new GeneralResponse
-				{
-					Result = _leePaySerializer.Serialize(applyInfo)
-				};
-
-				return msg.ToByteArray();
-			}
-			else
-			{
-				var response = new LeePayQueryExchangeRateResponse(
-					result.Code,
-					null,
-					null,
-					null,
-					result.Message,
-					result.OriginalResponse);
-
-				var applyInfo = new LeePayQueryExchangeRateApplyInfo(settings, response);
-
-				var msg = new GeneralResponse
-				{
-					Result = _leePaySerializer.Serialize(applyInfo)
-				};
-
-				return msg.ToByteArray();
-			}
+			return msg.ToByteArray();
 		}
 	}
 }

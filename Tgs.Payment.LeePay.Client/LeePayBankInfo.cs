@@ -1,5 +1,4 @@
-﻿namespace Tgs.Payment.LeePay
-{
-	public record LeePayBankInfo(
-		string Address);
-}
+﻿namespace Tgs.Payment.LeePay;
+
+public record LeePayBankInfo(
+	string Address);

@@ -2,47 +2,46 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
-namespace Tgs.Payment.LeePay.Services
+namespace Tgs.Payment.LeePay.Services;
+
+internal class GetDepositFormQueryService : IGetService<GetDepositFormQuery, DepositFormInfo?>
 {
-	internal class GetDepositFormQueryService : IGetService<GetDepositFormQuery, DepositFormInfo?>
+	private readonly LeePaySerializer _leePaySerializer;
+	private readonly IPaymentServiceClient _paymentServiceClient;
+
+	public GetDepositFormQueryService(IPaymentServiceClient paymentServiceClient, LeePaySerializer leePaySerializer)
 	{
-		private readonly LeePaySerializer _leePaySerializer;
-		private readonly IPaymentServiceClient _paymentServiceClient;
+		_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+		_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
+	}
 
-		public GetDepositFormQueryService(IPaymentServiceClient paymentServiceClient, LeePaySerializer leePaySerializer)
-		{
-			_paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
-		}
+	public async ValueTask<DepositFormInfo?> GetAsync(GetDepositFormQuery query, CancellationToken cancellationToken = default)
+	{
+		var depositFormId = new Guid(Convert.FromBase64String(query.CustomOrderNo));
 
-		public async ValueTask<DepositFormInfo?> GetAsync(GetDepositFormQuery query, CancellationToken cancellationToken = default)
-		{
-			var depositFormId = new Guid(Convert.FromBase64String(query.CustomOrderNo));
+		var formData = await _paymentServiceClient
+			.GetDepositFormAsync(depositFormId)
+			.ConfigureAwait(false);
 
-			var formData = await _paymentServiceClient
-				.GetDepositFormAsync(depositFormId)
-				.ConfigureAwait(false);
+		if (formData == null)
+			return null;
 
-			if (formData == null)
-				return null;
+		var applyInfo = string.IsNullOrEmpty(formData.ApplyInfo)
+			? null
+			: _leePaySerializer.Deserialize<LeePayDepositApplyInfo>(formData.ApplyInfo);
 
-			var applyInfo = string.IsNullOrEmpty(formData.ApplyInfo)
-				? null
-				: _leePaySerializer.Deserialize<LeePayDepositApplyInfo>(formData.ApplyInfo);
-
-			return formData == null
-				? null
-				: new DepositFormInfo(
-					formData.Id,
-					formData.PlayerCode,
-					formData.BrandId,
-					formData.BrandPaymentId,
-					formData.Amount,
-					formData.Status,
-					applyInfo,
-					formData.PaymentReturn);
-		}
+		return formData == null
+			? null
+			: new DepositFormInfo(
+				formData.Id,
+				formData.PlayerCode,
+				formData.BrandId,
+				formData.BrandPaymentId,
+				formData.Amount,
+				formData.Status,
+				applyInfo,
+				formData.PaymentReturn);
 	}
 }

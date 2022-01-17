@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<Version>0.0.10</Version>
 		<Authors>Raypro</Authors>
@@ -12,6 +12,7 @@
 		<IsPackable>true</IsPackable>
 		<PackageId>Tgs.Payment.LeePay.Client</PackageId>
 		<RootNamespace>Tgs.Payment.LeePay</RootNamespace>
+		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 
 </Project>
