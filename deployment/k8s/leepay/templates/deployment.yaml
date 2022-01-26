@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "leepay.fullname" . }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "leepay.labels" . | nindent 4 }}
 spec:
@@ -18,31 +18,14 @@ spec:
       {{- end }}
       labels:
         {{- include "leepay.selectorLabels" . | nindent 8 }}
+        tgs.kind: payment
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{ if eq .Values.namespace "staging" }}
-      nodeSelector:
-        dedicated: nonprod
-      tolerations:
-      - effect: NoSchedule
-        key: dedicated
-        operator: Equal
-        value: nonprod
-      {{ end }}
-      {{ if eq .Values.namespace "prod" }}
-      nodeSelector:
-        dedicated: prod
-      tolerations:
-      - effect: NoSchedule
-        key: dedicated
-        operator: Equal
-        value: prod
-      {{ end }}
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}      
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -56,6 +39,12 @@ spec:
           env:
             - name: LeePay__IsSimulation
               value: "{{ .Values.simulation }}"
+            - name: OTEL_SERVICE_NAME
+              value: Payment-Leepay({{ .Release.Namespace }})
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
           volumeMounts:
             - mountPath: /config/appsettings.json
               name: appsettings
@@ -65,10 +54,13 @@ spec:
             httpGet:
               path: /healthz
               port: http
-          readinessProbe:
+            periodSeconds: 5
+          startupProbe:
             httpGet:
               path: /healthz
               port: http
+            periodSeconds: 2
+            failureThreshold: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

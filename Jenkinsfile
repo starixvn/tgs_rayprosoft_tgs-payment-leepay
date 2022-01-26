@@ -4,9 +4,8 @@ pipeline {
 	agent any
 	
 	environment {
-		BuildConfiguration="Debug"
-		ImageName="registry.gitlab.com/rayprosoft/turnkey-gaming-system/payment-leepay"
-		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2158079/tags"
+		BuildConfiguration="Debug"		
+        ImageName = "harbor.rpgp.cc/tgs/payment-leepay"
 	}
 
 	stages {
@@ -19,14 +18,20 @@ pipeline {
                         case ['origin/main','main']:
                             env.kube_ns = "prod";
                             env.k8s_config = 'stag-k8s-config';
+                            env.node_selector = '{ "dedicated": "prod" }';
+                            env.dedicated = '{"effect":"NoSchedule","key": "dedicated", "operator": "Equal", "value": "prod"}';
                             break;
                         case ['origin/release','release']:
                             env.kube_ns = "staging";
                             env.k8s_config = 'stag-k8s-config';
+                            env.node_selector = '{ "dedicated": "nonprod" }';
+                            env.dedicated = '{"effect":"NoSchedule","key": "dedicated", "operator": "Equal", "value": "noprod"}';
                             break;
                         default:
                             env.kube_ns = "dev";
-                            env.k8s_config = 'k8s-kube-config' 
+                            env.k8s_config = 'k8s-kube-config';
+                            env.node_selector = '{}';
+                            env.dedicated = ''; 
                             break;
                     }
                 }
@@ -100,23 +105,32 @@ pipeline {
 			steps {
 				withKubeConfig([credentialsId: env.k8s_config]) {
                         sh '''
-                            helm template deployment/k8s/leepay \
+                            cat << EOF | yq e -P | helm template deployment/k8s/leepay \
+                                -n ${kube_ns} \
                                 --set image.tag=${TAG} \
-                                --set namespace=${kube_ns} \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
-                                --set simulation="$tgs_simulation_leepay"
-                        '''
-                        sh '''
-                            helm template deployment/k8s/leepay \
-                                --set image.tag=${TAG} \
-                                --set namespace=${kube_ns} \
                                 --set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
                                 --set nats="$tgs_nats" \
                                 --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
                                 --set simulation="$tgs_simulation_leepay" \
-                                | kubectl -n ${kube_ns} apply -f -
+                                -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated]
+                            }
+                        '''
+                        sh '''
+                            cat << EOF | yq e -P | helm template deployment/k8s/leepay \
+                                -n ${kube_ns} \
+                                --set image.tag=${TAG} \
+                                --set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
+                                --set nats="$tgs_nats" \
+                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
+                                --set simulation="$tgs_simulation_leepay" \
+                            | kubectl -n ${kube_ns} apply -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated]
+                            }
                         '''
 				}
 			}
@@ -134,15 +148,7 @@ pipeline {
                     sh "git push ${GIT_URL} ${TAG} HEAD:${GIT_BRANCH}"
                 }
             }
-        }
-
-        stage('Remove Image Tags') {					
-            steps {	
-                withCredentials([string(credentialsId: "GitLabToken", variable: "GitLabToken")]) {					
-                    sh "curl --request DELETE --data \'name_regex_delete=.*\' --data \'keep_n=10\' --header \'PRIVATE-TOKEN: ${GitLabToken}\' ${ImageTagUrl}"
-                }
-            }
-        }
+        }        
 	}
 
 	post {
