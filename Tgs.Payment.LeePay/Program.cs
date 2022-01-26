@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -75,16 +74,10 @@ builder.Services.AddOpenTelemetryTracing(builder =>
 	builder
 		.SetResourceBuilder(ResourceBuilder.CreateDefault()
 		.AddEnvironmentVariableDetector())
-		.AddSource("Tgs.Payment.Leepay")
+		.AddSource("Tgs.*")
 		.AddAspNetCoreInstrumentation()
 		.AddHttpClientInstrumentation()
-		.AddProfileViewExporter(builder =>
-		{
-			builder
-				.AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg"))
-				.AddFilter(new UrlPathFilter("/swagger"))
-				.AddFilter(new UrlPathFilter("/healthz"));
-		})
+		.AddProfileViewExporter()
 		.AddOtlpExporter();
 });
 
