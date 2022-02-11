@@ -121,7 +121,8 @@ pipeline {
                                 -f -
                             {
                                 "nodeSelector": $node_selector,
-                                "tolerations": [$dedicated]
+                                "tolerations": [$dedicated],
+                                "resources": $resources
                             }
                         """
                         sh """
@@ -132,10 +133,12 @@ pipeline {
                                 --set nats=$tgs_nats \
                                 --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_leepay \
                                 --set simulation=$tgs_simulation_leepay \
+                                -f - \
                             | kubectl -n ${kube_ns} apply -f -
                             {
                                 "nodeSelector": $node_selector,
-                                "tolerations": [$dedicated]
+                                "tolerations": [$dedicated],
+                                "resources": $resources
                             }
                         """
 				    }
