@@ -103,36 +103,43 @@ pipeline {
 
 		stage('Deploy to k8s') {
 			steps {
-				withKubeConfig([credentialsId: env.k8s_config]) {
-                        sh '''
+                script {
+				    withKubeConfig([credentialsId: env.k8s_config]) {
+
+                        def resources = getResources(env.k8s_config, env.kube_ns, "payment-leepay")
+    						    
+                        println resources
+
+                        sh """
                             cat << EOF | yq e -P | helm template deployment/k8s/leepay \
                                 -n ${kube_ns} \
                                 --set image.tag=${TAG} \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
-                                --set simulation="$tgs_simulation_leepay" \
+                                --set paymentApiUrl=$tgs_paymentApiUrl_leepay \
+                                --set nats=$tgs_nats \
+                                --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_leepay \
+                                --set simulation=$tgs_simulation_leepay \
                                 -f -
                             {
                                 "nodeSelector": $node_selector,
                                 "tolerations": [$dedicated]
                             }
-                        '''
-                        sh '''
+                        """
+                        sh """
                             cat << EOF | yq e -P | helm template deployment/k8s/leepay \
                                 -n ${kube_ns} \
                                 --set image.tag=${TAG} \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_leepay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_leepay" \
-                                --set simulation="$tgs_simulation_leepay" \
+                                --set paymentApiUrl=$tgs_paymentApiUrl_leepay \
+                                --set nats=$tgs_nats \
+                                --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_leepay \
+                                --set simulation=$tgs_simulation_leepay \
                             | kubectl -n ${kube_ns} apply -f -
                             {
                                 "nodeSelector": $node_selector,
                                 "tolerations": [$dedicated]
                             }
-                        '''
-				}
+                        """
+				    }
+                }
 			}
 		}
 
