@@ -35,6 +35,7 @@ Common labels
 */}}
 {{- define "leepay.labels" -}}
 {{ include "leepay.selectorLabels" . }}
+tgs.kind: payment
 {{- end }}
 
 {{/*

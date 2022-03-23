@@ -8,106 +8,105 @@ using Microsoft.Extensions.Options;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay.Services;
 using Tgs.Payment.LeePay.ViewModels;
-using TGS.ServiceUtility;
+using Tgs.ServiceUtility;
 
-namespace Tgs.Payment.LeePay.Controllers
+namespace Tgs.Payment.LeePay.Controllers;
+
+[Route("[controller]")]
+[ApiController]
+public class WithdrawController : ControllerBase
 {
-	[Route("[controller]")]
-	[ApiController]
-	public class WithdrawController : ControllerBase
+	private readonly ILogger<WithdrawController> _logger;
+
+	public WithdrawController(ILogger<WithdrawController> logger)
 	{
-		private readonly ILogger<WithdrawController> _logger;
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+	}
 
-		public WithdrawController(ILogger<WithdrawController> logger)
+	[HttpPost("callback")]
+	public async Task<WithdrawConfirmViewModel> WithdrawCallbackAsync(
+		[FromServices] IOptions<JsonOptions> jsonOptions,
+		[FromServices] IGetService<GetWithdrawFormQuery, WithdrawFormInfo> getWithdrawFormService,
+		[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
+		[FromServices] ICommandService<SaveWithdrawReturnCommand> saveReturnService,
+		[FromBody] Dictionary<string, object> response)
+	{
+		var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
+
+		var json = JsonSerializer.Serialize(response, jsonSerializerOptions);
+
+		_logger.LogInformation(json);
+
+		var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(json)!;
+		_ = dict.Remove("txnSign");
+
+		var withdrawResponse = JsonSerializer.Deserialize<WithdrawResponseViewModel>(json)!;
+
+		var withdrawForm = await getWithdrawFormService
+			.GetAsync(new GetWithdrawFormQuery(withdrawResponse.CustomOrderNo))
+			.ConfigureAwait(false);
+
+		var checkSigningCodeCommand = new CheckSigningCodeCommand(
+			dict,
+			withdrawResponse.TranscationSigningCode,
+			withdrawForm.ApplyInfo!.Settings.SystemId,
+			withdrawForm.ApplyInfo!.Settings.SystemKey);
+
+		await checkSigningCodeService
+			.ExecuteAsync(checkSigningCodeCommand)
+			.ConfigureAwait(false);
+
+		if (await checkSigningCodeCommand.CommandResultSource.Task.ConfigureAwait(false))
 		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		}
+			var returnData = new LeePayWithdrawReturn(
+				withdrawResponse.Channel,
+				withdrawResponse.CreatedAt,
+				withdrawResponse.CustomOrderNo,
+				withdrawResponse.Fee,
+				withdrawResponse.FeeRate,
+				withdrawResponse.NotifyCustomMessage,
+				withdrawResponse.OrderAmount,
+				withdrawResponse.OrderNo,
+				withdrawResponse.Status,
+				withdrawResponse.ToAddress,
+				withdrawResponse.TransactionHash);
 
-		[HttpPost("callback")]
-		public async Task<WithdrawConfirmViewModel> WithdrawCallbackAsync(
-			[FromServices] IOptions<JsonOptions> jsonOptions,
-			[FromServices] IGetService<GetWithdrawFormQuery, WithdrawFormInfo> getWithdrawFormService,
-			[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
-			[FromServices] ICommandService<SaveWithdrawReturnCommand> saveReturnService,
-			[FromBody] Dictionary<string, object> response)
-		{
-			var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
-
-			var json = JsonSerializer.Serialize(response, jsonSerializerOptions);
-
-			_logger.LogInformation(json);
-
-			var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(json)!;
-			dict.Remove("txnSign");
-
-			var withdrawResponse = JsonSerializer.Deserialize<WithdrawResponseViewModel>(json)!;
-
-			var withdrawForm = await getWithdrawFormService
-				.GetAsync(new GetWithdrawFormQuery(withdrawResponse.CustomOrderNo))
-				.ConfigureAwait(false);
-
-			var checkSigningCodeCommand = new CheckSigningCodeCommand(
-				dict,
-				withdrawResponse.TranscationSigningCode,
-				withdrawForm.ApplyInfo!.Settings.SystemId,
-				withdrawForm.ApplyInfo!.Settings.SystemKey);
-
-			await checkSigningCodeService
-				.ExecuteAsync(checkSigningCodeCommand)
-				.ConfigureAwait(false);
-
-			if (await checkSigningCodeCommand.CommandResultSource.Task.ConfigureAwait(false))
+			if (withdrawResponse.Status == "Success")
 			{
-				var returnData = new LeePayWithdrawReturn(
-					withdrawResponse.Channel,
-					withdrawResponse.CreatedAt,
-					withdrawResponse.CustomOrderNo,
-					withdrawResponse.Fee,
-					withdrawResponse.FeeRate,
-					withdrawResponse.NotifyCustomMessage,
-					withdrawResponse.OrderAmount,
-					withdrawResponse.OrderNo,
-					withdrawResponse.Status,
-					withdrawResponse.ToAddress,
-					withdrawResponse.TransactionHash);
+				var formStatus = withdrawForm.Status;
+				if (withdrawForm.Status == PaymentFlowState.Approved)
+					formStatus = PaymentFlowState.Paid;
 
-				if (withdrawResponse.Status == "Success")
-				{
-					var formStatus = withdrawForm.Status;
-					if (withdrawForm.Status == PaymentFlowState.Approved)
-						formStatus = PaymentFlowState.Paid;
+				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+					withdrawForm.Id,
+					formStatus,
+					returnData,
+					withdrawResponse.OrderAmount);
 
-					var saveWithdrawCommand = new SaveWithdrawReturnCommand(
-						withdrawForm.Id,
-						formStatus,
-						returnData,
-						withdrawResponse.OrderAmount);
-
-					await saveReturnService
-						.ExecuteAsync(saveWithdrawCommand)
-						.ConfigureAwait(false);
-				}
-				else
-				{
-					var saveWithdrawCommand = new SaveWithdrawReturnCommand(
-						withdrawForm.Id,
-						withdrawForm.Status,
-						returnData,
-						null);
-
-					await saveReturnService
-						.ExecuteAsync(saveWithdrawCommand)
-						.ConfigureAwait(false);
-				}
-
-				return new WithdrawConfirmViewModel
-				{
-					Code = "00",
-					Message = "Success"
-				};
+				await saveReturnService
+					.ExecuteAsync(saveWithdrawCommand)
+					.ConfigureAwait(false);
 			}
 			else
-				throw new Exception();
+			{
+				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+					withdrawForm.Id,
+					withdrawForm.Status,
+					returnData,
+					null);
+
+				await saveReturnService
+					.ExecuteAsync(saveWithdrawCommand)
+					.ConfigureAwait(false);
+			}
+
+			return new WithdrawConfirmViewModel
+			{
+				Code = "00",
+				Message = "Success"
+			};
 		}
+		else
+			throw new Exception();
 	}
 }

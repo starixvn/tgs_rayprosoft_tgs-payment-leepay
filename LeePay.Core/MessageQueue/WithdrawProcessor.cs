@@ -8,92 +8,88 @@ using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 
-namespace Tgs.Payment.LeePay.MessageQueue
+namespace Tgs.Payment.LeePay.MessageQueue;
+
+internal class WithdrawProcessor : IMessageProcessor
 {
-	internal class WithdrawProcessor : IMessageProcessor
+	private readonly LeePaySerializer _leePaySerializer;
+	private readonly LeePayOptions _options;
+	private readonly ILeePayClient _payClient;
+	private readonly IPaymentClient _paymentClient;
+
+	public WithdrawProcessor(
+		IOptions<LeePayOptions> optionsAccessor,
+		ILeePayClient payClient,
+		LeePaySerializer leePaySerializer,
+		IPaymentClient paymentClient)
 	{
-		private readonly LeePaySerializer _leePaySerializer;
-		private readonly ILogger<WithdrawProcessor> _logger;
-		private readonly LeePayOptions _options;
-		private readonly ILeePayClient _payClient;
-		private readonly IPaymentClient _paymentClient;
+		_options = optionsAccessor.Value;
+		_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
+		_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
+		_paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
+	}
 
-		public WithdrawProcessor(
-			IOptions<LeePayOptions> optionsAccessor,
-			ILeePayClient payClient,
-			LeePaySerializer leePaySerializer,
-			ILogger<WithdrawProcessor> logger,
-			IPaymentClient paymentClient)
+	public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+	{
+		var request = WithdrawRequest.Parser.ParseFrom(data);
+		var settings = _leePaySerializer.Deserialize<LeePayWithdrawSettings>(request.ApplyInfo)!;
+
+		var order = new WithdrawOrder
 		{
-			_options = optionsAccessor.Value;
-			_payClient = payClient ?? throw new ArgumentNullException(nameof(payClient));
-			_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-		}
+			CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
+			Amount = decimal.Parse(request.Amount),
+			DestinationAddress = settings.DestinationAddress,
+			NotifyUrl = $"{_options.CallbackBaseUrl}/withdraw/callback",
+			ChannelCurrency = settings.ChannelCurrency,
+			Channel = string.IsNullOrEmpty(settings.Channel) ? null : settings.Channel
+		};
 
-		public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+		var result = await _payClient
+			.WidthdrawAsync(settings.SystemId, settings.SystemKey, order)
+			.ConfigureAwait(false);
+
+		var orderResult = result.Data!;
+
+		if (result.Code == "00")
 		{
-			var request = WithdrawRequest.Parser.ParseFrom(data);
-			var settings = _leePaySerializer.Deserialize<LeePayWithdrawSettings>(request.ApplyInfo)!;
+			var response = new LeePayWithdrawResponse(
+				result.Code,
+				result.Message,
+				orderResult.OrderNo,
+				new Guid(Convert.FromBase64String(orderResult.CustomOrderNo)),
+				orderResult.UsdtAmount,
+				orderResult.ChannelCurrency,
+				orderResult.ChannelRate,
+				orderResult.Channel);
 
-			var order = new WithdrawOrder
-			{
-				CustomOrderNo = Convert.ToBase64String(settings.CustomOrderNo.ToByteArray()),
-				Amount = decimal.Parse(request.Amount),
-				DestinationAddress = settings.DestinationAddress,
-				NotifyUrl = $"{_options.CallbackBaseUrl}/withdraw/callback",
-				ChannelCurrency = settings.ChannelCurrency,
-				Channel = string.IsNullOrEmpty(settings.Channel) ? null : settings.Channel
-			};
+			var applyInfo = new LeePayWithdrawApplyInfo(settings, response);
 
-			var result = await _payClient
-				.WidthdrawAsync(settings.SystemId, settings.SystemKey, order)
+			await _paymentClient
+				.SaveWithdrawFormThirdPartyOrderNoAsync(settings.CustomOrderNo, orderResult.OrderNo)
 				.ConfigureAwait(false);
 
-			var orderResult = result.Data!;
-
-			if (result.Code == "00")
+			var msg = new WithdrawResponse
 			{
-				var response = new LeePayWithdrawResponse(
-					result.Code,
-					result.Message,
-					orderResult.OrderNo,
-					new Guid(Convert.FromBase64String(orderResult.CustomOrderNo)),
-					orderResult.UsdtAmount,
-					orderResult.ChannelCurrency,
-					orderResult.ChannelRate,
-					orderResult.Channel);
+				Result = _leePaySerializer.Serialize(applyInfo)
+			};
 
-				var applyInfo = new LeePayWithdrawApplyInfo(settings, response);
+			return msg.ToByteArray();
+		}
+		else
+		{
+			var response = new LeePayWithdrawResponse(
+				result.Code,
+				result.Message,
+				ResponseContent: result.OriginalResponse);
 
-				await _paymentClient
-					.SaveWithdrawFormThirdPartyOrderNoAsync(settings.CustomOrderNo, orderResult.OrderNo)
-					.ConfigureAwait(false);
+			var applyInfo = new LeePayWithdrawApplyInfo(settings, response);
 
-				var msg = new WithdrawResponse
-				{
-					Result = _leePaySerializer.Serialize(applyInfo)
-				};
-
-				return msg.ToByteArray();
-			}
-			else
+			var msg = new WithdrawResponse
 			{
-				var response = new LeePayWithdrawResponse(
-					result.Code,
-					result.Message,
-					ResponseContent: result.OriginalResponse);
+				Result = _leePaySerializer.Serialize(applyInfo)
+			};
 
-				var applyInfo = new LeePayWithdrawApplyInfo(settings, response);
-
-				var msg = new WithdrawResponse
-				{
-					Result = _leePaySerializer.Serialize(applyInfo)
-				};
-
-				return msg.ToByteArray();
-			}
+			return msg.ToByteArray();
 		}
 	}
 }

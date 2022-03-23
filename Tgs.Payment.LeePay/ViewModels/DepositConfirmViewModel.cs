@@ -1,9 +1,8 @@
-﻿namespace Tgs.Payment.LeePay.ViewModels
-{
-	public record DepositConfirmViewModel
-	{
-		public string Code { get; init; } = default!;
+﻿namespace Tgs.Payment.LeePay.ViewModels;
 
-		public string Message { get; init; } = default!;
-	}
+public record DepositConfirmViewModel
+{
+	public string Code { get; init; } = default!;
+
+	public string Message { get; init; } = default!;
 }
