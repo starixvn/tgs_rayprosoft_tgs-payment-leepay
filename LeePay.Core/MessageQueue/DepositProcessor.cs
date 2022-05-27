@@ -25,9 +25,9 @@ internal class DepositProcessor : IMessageProcessor
 		_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
 	}
 
-	public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+	public async ValueTask<ReadOnlyMemory<byte>> HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
 	{
-		var request = DepositRequest.Parser.ParseFrom(data);
+		var request = DepositRequest.Parser.ParseFrom(data.Span);
 		var settings = _leePaySerializer.Deserialize<LeePayDepositSettings>(request.ApplyInfo)!;
 
 		var order = new DepositOrder

@@ -22,9 +22,9 @@ internal class QueryExchangeRateProcessor : IMessageProcessor
 		_leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
 	}
 
-	public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+	public async ValueTask<ReadOnlyMemory<byte>> HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
 	{
-		var request = GeneralRequest.Parser.ParseFrom(data);
+		var request = GeneralRequest.Parser.ParseFrom(data.Span);
 		var settings = _leePaySerializer.Deserialize<LeePayQueryExchangeRateSettings>(request.Content)!;
 
 		var result = await _payClient
