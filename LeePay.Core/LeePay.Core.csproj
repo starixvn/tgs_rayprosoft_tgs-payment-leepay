@@ -8,19 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.19.3" />
-    <PackageReference Include="Grpc.Tools" Version="2.43.0">
+    <PackageReference Include="Google.Protobuf" Version="3.21.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.46.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.4.0" />
-    <PackageReference Include="Tgs.Payment.Client" Version="0.4.2" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.2.0" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.6" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.4.6" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.4.0" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
 
