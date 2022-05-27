@@ -21,7 +21,10 @@ callbackBaseUrl: https://payment.yggdrasill.dev
 paymentServiceBaseUrl: http://payment-api
 simulation: true
 
-podAnnotations: {}
+podAnnotations:
+  prometheus.io/path: /metrics
+  prometheus.io/port: "52325"
+  prometheus.io/scrape: "true"
 
 podSecurityContext: {}
   # fsGroup: 2000
