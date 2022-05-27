@@ -68,22 +68,33 @@ public class WithdrawController : ControllerBase
 				withdrawResponse.ToAddress,
 				withdrawResponse.TransactionHash);
 
-			var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+			if (withdrawResponse.Status == "Success" && withdrawForm.Status == PaymentFlowState.Approved)
+			{
+				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
 					withdrawForm.Id,
 					returnData,
 					withdrawResponse.OrderAmount);
 
-			await saveReturnService
-				.ExecuteAsync(saveWithdrawCommand)
-				.ConfigureAwait(false);
+				await saveReturnService
+					.ExecuteAsync(saveWithdrawCommand)
+					.ConfigureAwait(false);
 
-			if (withdrawResponse.Status == "Success" && withdrawForm.Status == PaymentFlowState.Approved)
-			{
 				await paymentClient
 					.PaidWithdrawAsync(
 						withdrawForm.Id,
 						withdrawForm.BrandId,
 						HttpContext.RequestAborted)
+					.ConfigureAwait(false);
+			}
+			else
+			{
+				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+					withdrawForm.Id,
+					returnData,
+					null);
+
+				await saveReturnService
+					.ExecuteAsync(saveWithdrawCommand)
 					.ConfigureAwait(false);
 			}
 
