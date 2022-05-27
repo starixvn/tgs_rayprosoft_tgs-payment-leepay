@@ -29,9 +29,9 @@ internal class WithdrawProcessor : IMessageProcessor
 		_paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
 	}
 
-	public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+	public async ValueTask<ReadOnlyMemory<byte>> HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
 	{
-		var request = WithdrawRequest.Parser.ParseFrom(data);
+		var request = WithdrawRequest.Parser.ParseFrom(data.Span);
 		var settings = _leePaySerializer.Deserialize<LeePayWithdrawSettings>(request.ApplyInfo)!;
 
 		var order = new WithdrawOrder

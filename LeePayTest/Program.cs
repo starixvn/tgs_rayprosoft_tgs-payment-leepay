@@ -10,7 +10,9 @@ internal class Program
 		Host.CreateDefaultBuilder(args)
 			.ConfigureServices(services =>
 			{
-				_ = services.AddNatsMessageQueue(config =>
+				_ = services
+					.AddMessageQueue()
+					.AddNatsMessageQueue(config =>
 				  {
 					  _ = config.ConfigQueueOptions((options, ap) =>
 					  {

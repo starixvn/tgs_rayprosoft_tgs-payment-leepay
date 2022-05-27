@@ -1,8 +1,6 @@
-﻿using System;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Reflection;
 using Microsoft.Extensions.Options;
+using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.LeePay.MessageQueue;
 
@@ -29,15 +27,6 @@ public static class ServiceCollectionExtensions
 				var leePayOptions = sp.GetRequiredService<IOptions<LeePayOptions>>().Value;
 
 				options.PaymentServiceBaseUrl = leePayOptions.PaymentServiceBaseUrl;
-
-				options.JsonSerializerOptions = new JsonSerializerOptions
-				{
-					PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-					Converters =
-					{
-							new JsonStringEnumConverter()
-					}
-				};
 			})
 			.AddTransient<ILeePayClient>(sp =>
 			{
@@ -50,6 +39,7 @@ public static class ServiceCollectionExtensions
 			})
 			.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient)
 			.AddSingleton<LeePayHasher>()
+			.AddMessageQueue()
 			.AddNatsMessageQueue(config => config
 				.ConfigQueueOptions((options, sp) =>
 				{
@@ -60,6 +50,8 @@ public static class ServiceCollectionExtensions
 				.AddProcessor<DepositProcessor>("tgs.payment.leepay.deposit", "tgs.payment.leepay.deposit")
 				.AddProcessor<WithdrawProcessor>("tgs.payment.leepay.withdraw", "tgs.payment.leepay.withdraw")
 				.AddProcessor<QueryExchangeRateProcessor>("tgs.payment.leepay.queryexchangerate"))
+			.AddNatsGlobPatternExchange("*")
+			.Services
 			.AddPaymentClient();
 	}
 }
