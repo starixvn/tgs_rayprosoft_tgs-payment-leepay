@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay.Services;
@@ -29,6 +25,7 @@ public class WithdrawController : ControllerBase
 		[FromServices] IGetService<GetWithdrawFormQuery, WithdrawFormInfo> getWithdrawFormService,
 		[FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
 		[FromServices] ICommandService<SaveWithdrawReturnCommand> saveReturnService,
+		[FromServices] IPaymentClient paymentClient,
 		[FromBody] Dictionary<string, object> response)
 	{
 		var jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
@@ -71,32 +68,22 @@ public class WithdrawController : ControllerBase
 				withdrawResponse.ToAddress,
 				withdrawResponse.TransactionHash);
 
-			if (withdrawResponse.Status == "Success")
-			{
-				var formStatus = withdrawForm.Status;
-				if (withdrawForm.Status == PaymentFlowState.Approved)
-					formStatus = PaymentFlowState.Paid;
-
-				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
+			var saveWithdrawCommand = new SaveWithdrawReturnCommand(
 					withdrawForm.Id,
-					formStatus,
 					returnData,
 					withdrawResponse.OrderAmount);
 
-				await saveReturnService
-					.ExecuteAsync(saveWithdrawCommand)
-					.ConfigureAwait(false);
-			}
-			else
-			{
-				var saveWithdrawCommand = new SaveWithdrawReturnCommand(
-					withdrawForm.Id,
-					withdrawForm.Status,
-					returnData,
-					null);
+			await saveReturnService
+				.ExecuteAsync(saveWithdrawCommand)
+				.ConfigureAwait(false);
 
-				await saveReturnService
-					.ExecuteAsync(saveWithdrawCommand)
+			if (withdrawResponse.Status == "Success" && withdrawForm.Status == PaymentFlowState.Approved)
+			{
+				await paymentClient
+					.PaidWithdrawAsync(
+						withdrawForm.Id,
+						withdrawForm.BrandId,
+						HttpContext.RequestAborted)
 					.ConfigureAwait(false);
 			}
 
